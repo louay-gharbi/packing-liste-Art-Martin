@@ -1,0 +1,50 @@
+{
+    "emptyTable": "Aucune donnée disponible dans le tableau",
+    "info": "Affichage de l'élément _START_ à _END_ sur _TOTAL_ éléments",
+    "infoEmpty": "Affichage de l'élément 0 à 0 sur 0 élément",
+    "infoFiltered": "(filtré à partir de _MAX_ éléments au total)",
+    "infoPostFix": "",
+    "thousands": ",",
+    "lengthMenu": "Afficher _MENU_ éléments",
+    "loadingRecords": "Chargement...",
+    "processing": "Traitement...",
+    "search": "Rechercher :",
+    "zeroRecords": "Aucun élément correspondant trouvé",
+    "paginate": {
+        "first": "Premier",
+        "last": "Dernier",
+        "next": "Suivant",
+        "previous": "Précédent"
+    },
+    "aria": {
+        "sortAscending": ": activer pour trier la colonne par ordre croissant",
+        "sortDescending": ": activer pour trier la colonne par ordre décroissant"
+    },
+    "select": {
+        "rows": {
+            "_": "%d lignes sélectionnées",
+            "0": "Aucune ligne sélectionnée",
+            "1": "1 ligne sélectionnée"
+        }
+    },
+    "buttons": {
+        "copy": "Copier",
+        "colvis": "Visibilité",
+        "collection": "Collection",
+        "colvisRestore": "Restaurer la visibilité",
+        "copyKeys": "Appuyez sur ctrl ou u2318 + C pour copier les données du tableau dans votre presse-papiers.",
+        "copySuccess": {
+            "_": "%d lignes copiées",
+            "1": "1 ligne copiée"
+        },
+        "copyTitle": "Copier dans le presse-papiers",
+        "csv": "CSV",
+        "excel": "Excel",
+        "pageLength": {
+            "-1": "Afficher toutes les lignes",
+            "_": "Afficher %d lignes"
+        },
+        "pdf": "PDF",
+        "print": "Imprimer"
+    }
+}

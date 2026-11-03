@@ -1,0 +1,49 @@
+# Dépendances Composer
+/vendor/
+
+# Fichiers de configuration sensibles
+.env
+.env.local
+.env.*.local
+
+# Logs applicatifs
+/logs/*.log
+/logs/*.txt
+
+# QR codes générés dynamiquement
+/public/qrcodes/**
+
+# Cache PHP
+*.cache
+
+# Fichiers IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Fichiers système OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# PHPUnit
+.phpunit.result.cache
+/coverage/
+
+# Fichiers temporaires d'upload
+/tmp/
+/temp/
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# Sauvegardes de la base (donnees reelles) : jamais dans Git, seules les migrations sont versionnees
+/database/*.sql
+
+# Photos de profil envoyees par les utilisateurs
+/storage/
+

@@ -1,0 +1,10 @@
+/* Mise en forme des groupes parent/enfants de colis */
+.parent-colis-row td, .child-colis-row td {
+    font-weight: bold;
+    border-left: 2px solid #000;
+    border-right: 2px solid #000;
+}
+
+
+.group-start td { border-top: 2px solid #000; }
+.group-end td { border-bottom: 2px solid #000; }

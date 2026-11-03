@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation Technique - PackingList Pro</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; background-color: #f4f4f4; color: #333; }
+        .container { max-width: 960px; margin: auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2, h3, h4 { color: #2c3e50; }
+        h1 { border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        h2 { border-bottom: 1px solid #eaeaea; padding-bottom: 8px; margin-top: 30px; }
+        h3 { margin-top: 25px; color: #34495e; }
+        h4 { margin-top: 20px; color: #7f8c8d; }
+        pre { background-color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word; font-family: 'Courier New', Courier, monospace; }
+        code { font-family: 'Courier New', Courier, monospace; background-color: #e8e8e8; padding: 2px 4px; border-radius: 3px; }
+        .code-block { background-color: #2d2d2d; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto; margin-bottom:15px; }
+        .code-block code { background-color: transparent; padding: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 15px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #3498db; color: white; }
+        ul, ol { margin-left: 20px; }
+        li { margin-bottom: 5px; }
+        .note { background-color: #fff3cd; border-left: 5px solid #ffeeba; padding: 10px; margin: 15px 0; }
+        .filepath { font-style: italic; color: #27ae60; }
+        .toc { border: 1px solid #eee; padding: 15px; margin-bottom: 30px; background-color: #f9f9f9; border-radius:5px;}
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc ul ul { padding-left: 20px; }
+        .toc a { text-decoration: none; color: #2980b9; }
+        .toc a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Documentation Technique : Application PackingList Pro</h1>
+
+        <div class="toc">
+            <h2>Table des Matières (Simplifiée)</h2>
+            <ul>
+                <li><a href="#architecture-overview">1. Vue d'Ensemble de l'Architecture</a></li>
+                <li><a href="#folder-structure">2. Structure des Dossiers et Fichiers</a></li>
+                <li><a href="#database">3. Base de Données</a>
+                    <ul>
+                        <li><a href="#db-schema">3.1 Schéma (Conceptuel)</a></li>
+                        <li><a href="#db-tables">3.2 Description des Tables Principales</a></li>
+                    </ul>
+                </li>
+                <li><a href="#dependencies">4. Librairies et Dépendances Externes</a></li>
+                <li><a href="#backend-components">5. Composants Clés du Backend (PHP)</a>
+                    <ul>
+                        <li><a href="#config-file">5.1 Configuration</a></li>
+                        <li><a href="#entry-routing">5.2 Point d'Entrée et Routage</a></li>
+                        <li><a href="#request-response">5.3 Requêtes et Réponses</a></li>
+                        <li><a href="#base-controller">5.4 Contrôleur de Base</a></li>
+                        <li><a href="#authentication">5.5 Authentification</a></li>
+                        <li><a href="#models">5.6 Modèles Principaux</a></li>
+                        <li><a href="#services">5.7 Services Utilitaires</a></li>
+                        <li><a href="#controllers-desc">5.8 Description des Contrôleurs</a></li>
+                    </ul>
+                </li>
+                <li><a href="#frontend">6. Frontend</a>
+                    <ul>
+                        <li><a href="#view-structure">6.1 Structure des Vues</a></li>
+                        <li><a href="#layouts">6.2 Layouts</a></li>
+                        <li><a href="#javascript">6.3 JavaScript</a></li>
+                    </ul>
+                </li>
+                <li><a href="#key-flows">7. Flux de Données et Logiques Métier Clés</a></li>
+                <li><a href="#deployment">8. Déploiement (Bases)</a></li>
+            </ul>
+        </div>
+
+        <h2 id="architecture-overview">1. Vue d'Ensemble de l'Architecture</h2>
+        <p>L'application "PackingList Pro" est une application web PHP développée sans framework majeur ("PHP Vanilla"). Elle adopte une structure inspirée du modèle MVC (Modèle-Vue-Contrôleur) pour organiser le code et séparer les préoccupations.</p>
+        <ul>
+            <li><strong>Modèle (Model) :</strong> Gère les données et la logique métier. Interagit avec la base de données MySQL. Les modèles se trouvent dans <span class="filepath">src/Models/</span>.</li>
+            <li><strong>Vue (View) :</strong> Responsable de la présentation des données à l'utilisateur. Ce sont des fichiers PHP/HTML situés dans <span class="filepath">src/Views/</span>.</li>
+            <li><strong>Contrôleur (Controller) :</strong> Reçoit les requêtes HTTP, interagit avec les modèles pour récupérer ou modifier les données, et sélectionne la vue appropriée pour afficher la réponse. Les contrôleurs sont dans <span class="filepath">src/Controllers/</span>.</li>
+        </ul>
+        <p>Un point d'entrée unique (<span class="filepath">public/index.php</span>) gère toutes les requêtes, qui sont ensuite dirigées par un routeur simple vers le contrôleur et l'action appropriés.</p>
+        <p>L'application utilise Composer pour la gestion des dépendances (comme les librairies pour QR code, Excel, PDF) et pour l'autoloading PSR-4.</p>
+
+        <h2 id="folder-structure">2. Structure des Dossiers et Fichiers</h2>
+        <pre><code>
+packinglist/
+├── config/                 # Fichiers de configuration (BDD, constantes applicatives)
+│   ├── config.php
+│   └── database.php
+├── database/               # Scripts SQL (création de tables, migrations futures)
+│   └── packing_list_db.sql
+├── docs/                   # Documentation (comme ce fichier)
+├── public/                 # Racine web, seul dossier accessible publiquement
+│   ├── css/                # Fichiers CSS
+│   ├── js/                 # Fichiers JavaScript (app.js, librairies vendor JS)
+│   ├── images/             # Images statiques
+│   ├── qrcodes/            # QR codes générés (palettes, etc.)
+│   ├── .htaccess           # Règles de réécriture Apache
+│   └── index.php           # Point d'entrée unique de l'application
+├── src/                    # Code source principal de l'application (PHP)
+│   ├── Attributes/         # (Optionnel, pour attributs PHP 8+)
+│   ├── Controllers/        # Contrôleurs
+│   ├── Lib/                # Librairies et classes utilitaires de base (Auth, Router, Request, Response, etc.)
+│   ├── Models/             # Modèles de données
+│   ├── Services/           # Classes de service (QrCodeService, ReferenceGenerator)
+│   └── Views/              # Fichiers de vue (HTML/PHP)
+│       ├── auth/
+│       ├── colis/
+│       ├── dashboard/
+│       ├── errors/
+│       ├── layouts/        # Squelettes de page (layouts)
+│       ├── packing_lists/
+│       ├── palettes/
+│       ├── partials/       # Fragments de vue réutilisables
+│       ├── permissions/
+│       ├── roles/
+│       ├── settings/
+│       ├── sites/
+│       └── theoretical_exports/
+├── vendor/                 # Dépendances gérées par Composer (ex: endroid/qr-code)
+├── composer.json           # Définition du projet Composer et des dépendances
+└── composer.lock           # Enregistre les versions exactes des dépendances installées
+        </code></pre>
+
+        <h2 id="database">3. Base de Données</h2>
+        <h3 id="db-schema">3.1 Schéma de la Base de Données (Conceptuel)</h3>
+        <p>La base de données est MySQL. Le schéma principal s'articule autour des utilisateurs, de leurs rôles et permissions, des sites, des packing lists, des palettes et des colis. Les exports théoriques sont stockés pour comparaison.</p>
+        <p><em>(Idéalement, insérer ici un diagramme Entité-Association simplifié si possible, ou un lien vers celui-ci)</em></p>
+        <p>Les relations clés incluent :</p>
+        <ul>
+            <li>Utilisateurs <-> Rôles (plusieurs-à-plusieurs via `user_roles`)</li>
+            <li>Rôles <-> Permissions (plusieurs-à-plusieurs via `role_permissions`)</li>
+            <li>Utilisateurs -> Sites (un utilisateur peut être rattaché à un site)</li>
+            <li>Packing Lists -> Sites (une PL appartient à un site)</li>
+            <li>Palettes -> Packing Lists (une palette appartient à une PL)</li>
+            <li>Colis -> Palettes (un colis appartient à une palette)</li>
+            <li>Theoretical Exports -> Sites (un export théorique est pour un site)</li>
+        </ul>
+
+        <h3 id="db-tables">3.2 Description des Tables Principales</h3>
+        <p>Voici une description des tables les plus importantes. Pour les détails complets des colonnes, types et contraintes, se référer au script SQL de création de la base de données (<span class="filepath">database/packing_list_db.sql</span>).</p>
+        
+        <h4>Table `users`</h4>
+        <p>Stocke les informations des utilisateurs de l'application.</p>
+        <ul>
+            <li>`id` : PK, auto-incrémenté</li>
+            <li>`username` : Nom d'utilisateur unique pour la connexion</li>
+            <li>`password_hash` : Mot de passe hashé</li>
+            <li>`email` : Email unique de l'utilisateur</li>
+            <li>`first_name`, `last_name` : Prénom et nom</li>
+            <li>`is_active` : Booléen (compte actif ou inactif)</li>
+            <li>`site_id` : FK (optionnelle) vers `sites.id`, site de rattachement principal de l'utilisateur</li>
+            <li>`created_at`, `updated_at` : Timestamps</li>
+        </ul>
+
+        <h4>Table `sites`</h4>
+        <p>Définit les différents sites opérationnels.</p>
+        <ul>
+            <li>`id` : PK, auto-incrémenté</li>
+            <li>`code` : Code court unique pour le site (ex: "PANTIN", "LYON01")</li>
+            <li>`name` : Nom complet du site</li>
+            <li>`address` : Adresse du site (optionnel)</li>
+            <li>`is_active` : Booléen</li>
+            <li>`created_at`, `updated_at` : Timestamps</li>
+        </ul>
+
+        <h4>Table `roles`</h4>
+        <p>Définit les rôles utilisateurs (ex: Administrateur, Superviseur).</p>
+        <ul><li>`id`, `name`, `description`, `created_at`, `updated_at`</li></ul>
+
+        <h4>Table `permissions`</h4>
+        <p>Définit les permissions granulaires de l'application (ex: `packinglist_create`).</p>
+        <ul><li>`id`, `name` (code unique de la permission), `description`, `created_at`, `updated_at`</li></ul>
+
+        <h4>Table `user_roles`</h4>
+        <p>Table de liaison pour la relation plusieurs-à-plusieurs entre `users` et `roles`.</p>
+        <ul><li>`user_id` (FK), `role_id` (FK)</li></ul>
+
+        <h4>Table `role_permissions`</h4>
+        <p>Table de liaison pour la relation plusieurs-à-plusieurs entre `roles` et `permissions`.</p>
+        <ul><li>`role_id` (FK), `permission_id` (FK)</li></ul>
+        
+        <h4>Table `settings`</h4>
+        <p>Stocke les paramètres globaux de l'application (ex: patrons de codification).</p>
+        <ul><li>`id`, `setting_key` (unique), `setting_value`, `description`, `updated_at`</li></ul>
+
+        <h4>Table `dynamic_counters`</h4>
+        <p>Gère les compteurs dynamiques pour les patrons de codification (par site, année, mois).</p>
+        <ul><li>`id`, `counter_key` (unique, ex: `pl_site1_yearly_2025`), `current_value`, `updated_at`</li></ul>
+
+        <h4>Table `packing_lists`</h4>
+        <p>Informations des listes de colisage.</p>
+        <ul>
+            <li>`id` : PK</li>
+            <li>`site_id` : FK vers `sites.id`, site de la PL (NOT NULL après les dernières modifications)</li>
+            <li>`reference` : Référence unique générée (ex: PL-SITE-202505-001)</li>
+            <li>`ship_date` : Date d'expédition prévue</li>
+            <li>`status` : ENUM('open', 'closed')</li>
+            <li>`created_by_user_id`, `closed_by_user_id` : FK (nullables) vers `users.id`</li>
+            <li>`theoretical_batch_id` : (Supprimé, la liaison se fait par site/semaine de `ship_date`)</li>
+            <li>`created_at`, `updated_at`</li>
+        </ul>
+
+        <h4>Table `palettes`</h4>
+        <p>Informations des palettes associées aux packing lists.</p>
+        <ul>
+            <li>`id` : PK</li>
+            <li>`packing_list_id` : FK vers `packing_lists.id` (NOT NULL)</li>
+            <li>`code` : Code unique généré pour la palette</li>
+            <li>`qr_code_path` : Chemin relatif vers l'image QR code de la palette</li>
+            <li>`status` : ENUM('generated', 'open', 'closed')</li>
+            <li>`max_colis` : Nombre maximal de colis pour cette palette</li>
+            <li>`open_date_time`, `close_date_time` : Timestamps d'ouverture/fermeture</li>
+            <li>`created_by_user_id`, `opened_by_user_id`, `closed_by_user_id` : FK (nullables) vers `users.id`</li>
+            <li>`created_at`, `updated_at`</li>
+        </ul>
+
+        <h4>Table `colis`</h4>
+        <p>Informations de chaque colis scanné.</p>
+        <ul>
+            <li>`id` : PK</li>
+            <li>`palette_id` : FK vers `palettes.id` (NULL pour un colis enfant)</li>
+            <li>`package_number` : Numéro de colis unique (issu du QR code colis, contrainte UNIQUE globale)</li>
+            <li>`payload_json` : Contenu JSON valide (reconstruit à partir du payload brut du QR code)</li>
+            <li>`scan_date_time` : Timestamp du scan</li>
+            <li>`scanned_by_user_id` : FK (nullable) vers `users.id`</li>
+            <li>`type` : ENUM('parent','product') pour distinguer un colis parent d'un colis classique</li>
+            <li>`parent_colis_id` : FK vers `colis.id` si ce colis est un enfant</li>
+            <li>`client_name`, `of_number`, `order_number`, `sku`, `label`, `quantity` : Champs parsés du payload</li>
+            <li>`internal_reference`, `article_reference`, `unit`, `postal_code`, `line_number` : Nouveaux champs parsés du payload</li>
+            <li>`comment` : Champ texte optionnel</li>
+            <li>`created_at`, `updated_at`</li>
+        </ul>
+
+        <h4>Table `theoretical_exports`</h4>
+        <p>Stocke les quantités théoriques attendues (importées via CSV).</p>
+        <ul>
+            <li>`id` : PK</li>
+            <li>`site_id` : FK vers `sites.id` (NOT NULL)</li>
+            <li>`import_year` : Année de l'import/validité du théorique (NOT NULL)</li>
+            <li>`import_week` : Semaine ISO de l'import/validité (NOT NULL)</li>
+            <li>`of_number`, `order_number`, `sku` : Clés pour la comparaison</li>
+            <li>`expected_quantity` : Quantité attendue</li>
+            <li>`imported_at` : Timestamp de l'import effectif du fichier</li>
+            <li>`imported_by_user_id` : FK (nullable) vers `users.id`</li>
+            <li>`created_at`, `updated_at`</li>
+        </ul>
+
+        <h2 id="dependencies">4. Librairies et Dépendances Externes</h2>
+        <p>L'application utilise Composer pour gérer ses dépendances PHP. Les principales librairies externes sont :</p>
+        <ul>
+            <li><strong>`endroid/qr-code` :</strong> Pour la génération des images QR code pour les palettes. Version 6.0.8 utilisée.</li>
+            <li><strong>`phpoffice/phpspreadsheet` :</strong> Pour la génération des fichiers Excel (.xlsx) pour l'export de la liste des colis.</li>
+            <li><strong>`dompdf/dompdf` :</strong> Pour la génération des fichiers PDF à partir de HTML, utilisé pour l'export de la liste des colis.</li>
+        </ul>
+        <p>Les dépendances frontend (JavaScript) incluent :</p>
+        <ul>
+            <li><strong>jQuery :</strong> Utilisé principalement par DataTables et pour des manipulations DOM simplifiées dans <span class="filepath">app.js</span>.</li>
+            <li><strong>DataTables :</strong> Pour améliorer l'affichage des tableaux (tri, recherche, pagination, exports). Inclut les extensions Buttons et Responsive.</li>
+            <li><strong>Bootstrap 5 :</strong> Pour la structure et le style de l'interface utilisateur. Ses composants JS (comme les Modales, Dropdowns) sont aussi utilisés.</li>
+            <li><strong>Font Awesome :</strong> Pour les icônes.</li>
+        </ul>
+        <p>Ces librairies sont chargées via des CDN dans le layout principal pour le frontend.</p>
+
+        <!-- La suite (Composants Backend, Frontend, etc.) sera dans la prochaine partie -->
+        <!-- pour ne pas dépasser les limites de réponse. -->
+    
+            <!-- Suite de la page HTML commencée dans la réponse précédente -->
+        <!-- S'assurer que les styles et le conteneur body/container sont ouverts -->
+
+        <h2 id="backend-components">5. Composants Clés du Backend (PHP)</h2>
+        <p>Le code backend est structuré en suivant une approche inspirée de MVC, avec des modèles, des vues (gérées par les contrôleurs), des contrôleurs, des librairies de base, et des services.</p>
+
+        <h3 id="config-file">5.1 Configuration (<span class="filepath">config/config.php</span> et <span class="filepath">config/database.php</span>)</h3>
+        <p><span class="filepath">config/config.php</span> est le fichier central pour les paramètres globaux de l'application :</p>
+        <ul>
+            <li>Configuration de l'affichage des erreurs et du fuseau horaire.</li>
+            <li>Définition dynamique de `APP_URL` et `BASE_URL` pour la portabilité entre environnements (local, production).</li>
+            <li>Définition des chemins système constants (`ROOT_PATH`, `PUBLIC_PATH`, `SRC_PATH`, `VIEWS_PATH`).</li>
+            <li>Paramètres de session (`SESSION_NAME`, `SESSION_LIFETIME`, etc.).</li>
+            <li>Constantes applicatives (`APP_NAME`, `APP_VERSION`).</li>
+            <li>Clés pour les messages Flash en session.</li>
+        </ul>
+        <p><span class="filepath">config/database.php</span> gère la configuration de la connexion à la base de données MySQL :</p>
+        <ul>
+            <li>Constantes `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_CHARSET`.</li>
+            <li>Construction du DSN (`DB_DSN`) pour PDO.</li>
+            <li>Options PDO par défaut (`PDO_OPTIONS`).</li>
+            <li>Fonction `getPDO()` : Fournit une instance unique (Singleton basique) de la connexion PDO.</li>
+        </ul>
+
+        <h3 id="entry-routing">5.2 Point d'Entrée et Routage</h3>
+        <h4>Point d'Entrée (<span class="filepath">public/index.php</span>)</h4>
+        <p>Toutes les requêtes HTTP vers l'application sont dirigées vers <span class="filepath">public/index.php</span> grâce aux règles de réécriture dans <span class="filepath">public/.htaccess</span> (Front Controller Pattern).</p>
+        <p>Ce script est responsable de :</p>
+        <ol>
+            <li>Initialiser la session.</li>
+            <li>Charger l'autoloader de Composer (<span class="filepath">vendor/autoload.php</span>).</li>
+            <li>Charger les fichiers de configuration (<span class="filepath">config/config.php</span> et <span class="filepath">config/database.php</span>).</li>
+            <li>Instancier un objet `App\Lib\Request` pour encapsuler les données de la requête.</li>
+            <li>Instancier le routeur `App\Lib\Router`.</li>
+            <li>Définir toutes les routes de l'application en associant des URI et des méthodes HTTP à des actions de contrôleurs.</li>
+            <li>Appeler la méthode `dispatch()` du routeur pour traiter la requête actuelle.</li>
+            <li>Récupérer l'objet `App\Lib\Response` retourné par l'action du contrôleur et appeler sa méthode `send()` pour envoyer la réponse au client.</li>
+            <li>Gérer les exceptions globales (ex: page 404 si route non trouvée, page 500 pour erreurs serveur).</li>
+        </ol>
+
+        <h4>Routeur (<span class="filepath">src/Lib/Router.php</span>)</h4>
+        <p>La classe `App\Lib\Router` gère la définition et la résolution des routes.</p>
+        <ul>
+            <li><strong>Définition des routes :</strong> Méthodes `get()`, `post()` (et potentiellement `put()`, `delete()`) pour enregistrer des routes. Une route est définie par une méthode HTTP, un chemin (qui peut contenir des paramètres comme `/users/edit/{id}`), et un "handler".</li>
+            <li><strong>Handlers :</strong> Le handler peut être :
+                <ul>
+                    <li>Une chaîne au format `'NomController@nomMethode'`.</li>
+                    <li>Un tableau `[NomCompletClasseController::class, 'nomMethode']`.</li>
+                    <li>Une Closure (fonction anonyme).</li>
+                </ul>
+            </li>
+            <li><strong>`dispatch(Request $request)` :</strong>
+                <ul>
+                    <li>Analyse l'URI et la méthode HTTP de l'objet `$request`.</li>
+                    <li>Normalise le chemin de la requête en tenant compte du `basePath` de l'application (si elle est dans un sous-dossier).</li>
+                    <li>Compare le chemin et la méthode avec les routes enregistrées.</li>
+                    <li>Supporte les paramètres de route (ex: `{id}`) en les convertissant en expressions régulières pour le matching. Les paramètres capturés sont passés à la méthode du contrôleur.</li>
+                    <li>Appelle le handler approprié via `callHandler()`.</li>
+                    <li>Lève une exception si aucune route ne correspond (menant à une 404).</li>
+                </ul>
+            </li>
+            <li><strong>`callHandler(...)` :</strong>
+                <ul>
+                    <li>Instancie le contrôleur spécifié (en ajoutant le namespace `App\Controllers\` si un nom simple est fourni).</li>
+                    <li>Vérifie l'existence de la classe contrôleur et de la méthode.</li>
+                    <li>Appelle la méthode du contrôleur en lui passant l'objet `Request` et les paramètres de route extraits de l'URI.</li>
+                    <li>Retourne la `Response` générée par le contrôleur.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3 id="request-response">5.3 Requêtes et Réponses</h3>
+        <h4>Classe `Request` (<span class="filepath">src/Lib/Request.php</span>)</h4>
+        <p>Encapsule les données de la requête HTTP entrante.</p>
+        <ul>
+            <li>Récupère les données des superglobales `$_GET`, `$_POST`, `$_SERVER`.</li>
+            <li>Détermine la méthode HTTP (`getMethod()`).</li>
+            <li>Fournit l'URI complète (`getUri()`) et le chemin normalisé sans paramètres GET (`getPath()`).</li>
+            <li>Méthodes pour accéder aux paramètres GET et POST (`get()`, `post()`, `allGet()`, `allPost()`, `hasGet()`, `hasPost()`).</li>
+            <li>Gère le décodage des payloads JSON pour les requêtes `application/json` (`json()`, `allJson()`).</li>
+        </ul>
+
+        <h4>Classe `Response` (<span class="filepath">src/Lib/Response.php</span>)</h4>
+        <p>Encapsule la réponse HTTP à envoyer au client.</p>
+        <ul>
+            <li>Gère le contenu (`setContent()`, `getContent()`), le code de statut HTTP (`setStatusCode()`, `getStatusCode()`), et les en-têtes (`setHeader()`, `getHeader()`).</li>
+            <li>Méthode `send()` : Envoie le code de statut, les en-têtes, et le contenu au client.</li>
+            <li>Méthodes statiques factory pour créer des types de réponses courants :
+                <ul>
+                    <li>`Response::json(...)` : Pour les réponses JSON.</li>
+                    <li>`Response::redirect(...)` : Pour les redirections HTTP.</li>
+                    <li>`Response::html(...)` : Pour rendre un fichier de vue simple (utilisé par `BaseController::renderPartial`).</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3 id="base-controller">5.4 Contrôleur de Base (<span class="filepath">src/Controllers/BaseController.php</span>)</h3>
+        <p>Classe abstraite dont tous les autres contrôleurs de l'application héritent. Elle fournit des fonctionnalités communes.</p>
+        <ul>
+            <li><strong>Propriété `$layout` :</strong> Spécifie le fichier de layout principal à utiliser (par défaut <span class="filepath">layouts/admin_app.php</span>). Peut être surchargé par les contrôleurs enfants.</li>
+            <li><strong>Méthode `authorize(string $permissionName, ...)` :</strong>
+                <ul>
+                    <li>Vérifie si l'utilisateur connecté (via `Auth::can()`) a la permission spécifiée.</li>
+                    <li>Si non autorisé, définit un message flash d'erreur et effectue une redirection (terminant le script).</li>
+                </ul>
+            </li>
+            <li><strong>Méthode `view(string $viewPath, array $data, ...)` :</strong>
+                <ul>
+                    <li>Méthode principale pour rendre une vue de contenu à l'intérieur du layout.</li>
+                    <li>Injecte des données par défaut (`appName`, `baseUrl`, `pageTitle`) à la vue et au layout.</li>
+                    <li>Appelle `renderPartial()` pour obtenir le HTML de la vue de contenu.</li>
+                    <li>Appelle `renderPartial()` à nouveau pour le layout, en lui passant les données et le contenu de la vue.</li>
+                    <li>Retourne un objet `Response` avec le HTML complet.</li>
+                </ul>
+            </li>
+            <li><strong>Méthode `renderPartial(string $filePath, array $data)` :</strong>
+                <ul>
+                    <li>Inclut un fichier de vue PHP et capture sa sortie dans une chaîne de caractères.</li>
+                    <li>Extrait les `$data` en variables locales accessibles dans la vue.</li>
+                    <li>Utilisée par `view()` pour le contenu et le layout.</li>
+                </ul>
+            </li>
+            <li><strong>Méthodes `json(...)` et `redirect(...)` :</strong> Raccourcis pour créer des objets `Response` de type JSON ou redirection.</li>
+            <li><strong>Méthode `flash(string $type, string $message)` :</strong> Pour enregistrer des messages flash en session.</li>
+        </ul>
+        
+        <h3 id="authentication">5.5 Authentification (<span class="filepath">src/Lib/Auth.php</span>)</h3>
+        <p>Classe statique gérant l'authentification, la session utilisateur et les vérifications de permissions.</p>
+        <ul>
+            <li><strong>`Auth::login(string $username, string $password)` :</strong>
+                <ul>
+                    <li>Vérifie les identifiants contre la base de données (via `User::findByUsername()`).</li>
+                    <li>Utilise `password_verify()` pour le mot de passe.</li>
+                    <li>Si succès, enregistre `user_id` en session et régénère l'ID de session.</li>
+                </ul>
+            </li>
+            <li><strong>`Auth::logout()` :</strong> Détruit la session utilisateur.</li>
+            <li><strong>`Auth::isLoggedIn()` :</strong> Vérifie si un utilisateur est connecté.</li>
+            <li><strong>`Auth::user()` :</strong> Retourne l'objet `User` de l'utilisateur connecté (avec une mise en cache statique simple pour la requête actuelle).</li>
+            <li><strong>`Auth::id()` :</strong> Retourne l'ID de l'utilisateur connecté.</li>
+            <li><strong>`Auth::protect(...)` :</strong> Redirige vers la page de connexion si l'utilisateur n'est pas connecté.</li>
+            <li><strong>`Auth::can(string $permissionName)` :</strong>
+                <ul>
+                    <li>Récupère l'utilisateur connecté.</li>
+                    <li>Appelle la méthode `$user->hasPermission($permissionName)` de l'objet `User`.</li>
+                </ul>
+            </li>
+            <li><strong>`Auth::hasRole(string $roleName)` :</strong> (Méthode de convenance) Vérifie si l'utilisateur connecté a un rôle spécifique.</li>
+        </ul>
+
+         <!-- Suite de la page HTML (après la section 5.5 Authentification) -->
+        <!-- S'assurer que les styles et le conteneur body/container sont ouverts -->
+
+        <h3 id="models">5.6 Modèles Principaux (<span class="filepath">src/Models/</span>)</h3>
+        <p>Les modèles sont responsables de l'interaction avec la base de données et de l'encapsulation de la logique métier liée aux données. Ils utilisent PDO pour les requêtes SQL, avec des requêtes préparées pour la sécurité. La plupart des modèles ont une méthode `hydrate()` privée statique pour convertir un tableau de données de la BDD en une instance de l'objet modèle.</p>
+
+        <h4>Modèle `User.php`</h4>
+        <p>Gère les données des utilisateurs, leurs rôles et leurs permissions.</p>
+        <ul>
+            <li><strong>Propriétés clés :</strong> `id`, `username`, `password_hash`, `email`, `first_name`, `last_name`, `is_active`, `site_id` (FK vers `sites`), `roles` (tableau d'objets `Role`), `site` (objet `Site` chargé).</li>
+            <li><strong>Méthodes CRUD :</strong>
+                <ul>
+                    <li>`findById(int $id)`: Récupère un utilisateur par ID.</li>
+                    <li>`findByUsername(string $username)`: Récupère un utilisateur par nom d'utilisateur.</li>
+                    <li>`findByEmail(string $email)`: Récupère un utilisateur par email.</li>
+                    <li>`getAll(array $filters = [], ...)`: Récupère tous les utilisateurs, avec filtres (notamment par `site_id`) et jointure optionnelle sur les sites pour afficher le nom/code du site.</li>
+                    <li>`create(array $data)`: Crée un nouvel utilisateur, incluant le hashage du mot de passe et l'assignation optionnelle de `site_id`.</li>
+                    <li>`update(int $id, array $data)`: Met à jour un utilisateur, gère la mise à jour du mot de passe (si fourni) et du `site_id`.</li>
+                    <li>`delete(int $id)`: Suppression physique d'un utilisateur (à utiliser avec précaution).</li>
+                </ul>
+            </li>
+            <li><strong>Gestion des Rôles :</strong>
+                <ul>
+                    <li>`loadRoles()`: Charge les objets `Role` associés à l'utilisateur depuis la table `user_roles` et les stocke dans `$this->roles`.</li>
+                    <li>`assignRole(int $roleId)`, `revokeRole(int $roleId)`: Gèrent les entrées dans `user_roles`.</li>
+                    <li>`syncRoles(array $roleIds)`: Synchronise les rôles de l'utilisateur avec la liste d'IDs fournie (ajoute les nouveaux, supprime les anciens).</li>
+                    <li>`hasRole(string $roleName)`: Vérifie si l'utilisateur possède un rôle spécifique par son nom.</li>
+                </ul>
+            </li>
+            <li><strong>Gestion des Permissions (via les rôles) :</strong>
+                <ul>
+                    <li>`hasPermission(string $permissionName)`: Vérifie si l'utilisateur a une permission donnée en parcourant les permissions de tous ses rôles. Appelle `Role::hasPermission()` pour chaque rôle.</li>
+                </ul>
+            </li>
+            <li><strong>Gestion du Site :</strong>
+                <ul>
+                    <li>`loadSite()`: Charge l'objet `Site` associé (si `site_id` est défini) et le stocke dans `$this->site`.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Modèle `Site.php`</h4>
+        <p>Gère les informations des sites opérationnels.</p>
+        <ul>
+            <li><strong>Propriétés clés :</strong> `id`, `code` (unique), `name`, `address`, `is_active`.</li>
+            <li><strong>Méthodes CRUD :</strong>
+                <ul>
+                    <li>`findById(int $id)`, `findByCode(string $code)`: Récupération par ID ou code.</li>
+                    <li>`getAllActive()`: Récupère uniquement les sites actifs (pour les dropdowns de sélection).</li>
+                    <li>`getAll()`: Récupère tous les sites (pour la gestion).</li>
+                    <li>`create(array $data)`: Crée un nouveau site.</li>
+                    <li>`update(int $id, array $data)`: Met à jour un site.</li>
+                    <li>`setActiveStatus(int $id, bool $isActive)`: Active ou désactive un site (soft delete).</li>
+                    <li>`forceDelete(int $id)`: Suppression physique (utilisation exceptionnelle).</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Modèle `Role.php`</h4>
+        <p>Gère les rôles et leur association avec les permissions.</p>
+        <ul>
+            <li><strong>Propriétés clés :</strong> `id`, `name` (unique), `description`, `permissions` (tableau d'objets `Permission`).</li>
+            <li><strong>Méthodes CRUD :</strong> `findById(int $id)`, `findByName(string $name)`, `getAll()`, `create(...)`, `update(...)`, `delete(...)`.</li>
+            <li><strong>Gestion des Permissions :</strong>
+                <ul>
+                    <li>`loadPermissions()`: Charge les objets `Permission` associés au rôle depuis `role_permissions` et les stocke dans `$this->permissions`.</li>
+                    <li>`assignPermission(int $permissionId)`, `revokePermission(int $permissionId)`: Gèrent les entrées dans `role_permissions`.</li>
+                    <li>`syncPermissions(array $permissionIds)`: Synchronise les permissions du rôle.</li>
+                    <li>`hasPermission(string $permissionName)`: Vérifie si le rôle possède une permission spécifique.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Modèle `Permission.php`</h4>
+        <p>Gère les permissions de l'application.</p>
+        <ul>
+            <li><strong>Propriétés clés :</strong> `id`, `name` (code unique de la permission), `description`.</li>
+            <li><strong>Méthodes CRUD :</strong> `findById(int $id)`, `getAll()`, `create(...)`, `update(...)`, `delete(...)`.</li>
+            <li>*(Actuellement, pas de méthode `findByName()` implémentée, mais serait utile pour des vérifications d'unicité plus robustes avant insertion.)*</li>
+        </ul>
+
+        <h4>Modèle `PackingList.php`</h4>
+        <p>Gère les listes de colisage.</p>
+        <ul>
+            <li><strong>Propriétés clés :</strong> `id`, `site_id` (FK), `reference` (unique), `ship_date`, `status` ('open', 'closed'), `created_by_user_id`, `closed_by_user_id`, `site` (objet `Site`), `paletteCount` (optionnel, pour affichage).</li>
+            <li><strong>Méthodes principales :</strong>
+                <ul>
+                    <li>`create(string $shipDateString, ?int $siteId, ?int $userId)`: Crée une PL. Appelle `ReferenceGenerator::generate()` pour la référence, en tenant compte du `$siteId` pour les patrons et compteurs par site.</li>
+                    <li>`findById(int $id)`, `getAll(array $filters, ...)` (filtre par site, jointure sur site).</li>
+                    <li>`updateShipDate(int $id, string $newShipDate)`: Modifie la date d'expédition si PL ouverte.</li>
+                    <li>`close(int $id, ?int $userId)`: Ferme la PL. Gère le statut des palettes associées (ferme celles ouvertes et non vides, supprime celles générées et vides).</li>
+                    <li>`reopen(int $id)`: Réouvre une PL fermée.</li>
+                    <li>`delete(int $id)`: Supprime une PL (si conditions remplies : ouverte, pas de palettes actives/fermées).</li>
+                    <li>`getPaletteCount()`: Compte les palettes associées.</li>
+                    <li>`loadSite()`: Charge l'objet `Site` associé.</li>
+                    <li>*(Anciennement `getAllColis()`, maintenant remplacé par `Colis::findAllByPackingListId()` pour une meilleure séparation des responsabilités).*</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Modèle `Palette.php`</h4>
+        <p>Gère les palettes.</p>
+        <ul>
+            <li><strong>Propriétés clés :</strong> `id`, `packing_list_id` (FK), `code` (unique), `qr_code_path`, `status` ('generated', 'open', 'closed'), `max_colis`, `open_date_time`, `close_date_time`, `colisCount` (optionnel), `packingListReference` (optionnel), `siteName` (optionnel).</li>
+            <li><strong>Méthodes principales :</strong>
+                <ul>
+                    <li>`create(int $packingListId, ?int $userId)`: Crée une palette. Appelle `ReferenceGenerator::generate()` pour le code et `QrCodeService::generateAndSavePaletteQrCode()` pour le QR code. Récupère le `site_id` de la PL parente pour le passer au `ReferenceGenerator`.</li>
+                    <li>`findById(int $id)`, `findByCode(string $code)`, `findByPackingListId(int $packingListId)`, `getAllFiltered(array $filters)`.</li>
+                    <li>`open(int $id, int $maxColis, ?int $userId)`: Ouvre une palette `generated`, enregistre `max_colis`.</li>
+                    <li>`updateMaxColis(int $id, int $newMaxColis)`: Modifie `max_colis` d'une palette ouverte.</li>
+                    <li>`updateFields(int $id, array $dataToUpdate)`: Méthode générique pour mettre à jour des champs (utilisée par `closePalette`).</li>
+                    <li>`reopen(int $id)`: Réouvre une palette fermée (si sa PL parente est ouverte).</li>
+                    <li>`deleteById(int $id)`: Suppression physique (conditions vérifiées dans le contrôleur).</li>
+                    <li>`getColisCount()`: Compte les colis sur la palette.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Modèle `Colis.php`</h4>
+        <p>Gère les colis scannés.</p>
+        <ul>
+            <li><strong>Propriétés clés :</strong> `id`, `palette_id`, `package_number`, `payload_json`, `scan_date_time`,
+                `type` (`parent` ou `product`), `parent_colis_id`, `comment`, et tous les champs parsés du payload
+                (`client_name`, `of_number`, ..., `line_number`). Propriétés optionnelles pour jointures :
+                `palette_code`, `packing_list_reference`, `site_name`, `site_code`.
+                Chaque colis possède également un tableau <code>children</code> pour ses éventuels enfants.</li>
+            <li><strong>Méthodes principales :</strong>
+                <ul>
+                    <li>`create(array $data)`: Enregistre un nouveau colis avec toutes ses informations (parsées et le JSON brut).</li>
+                    <li>`findById(int $id)`, `findByPaletteId(int $paletteId, ...)` (liste les colis d'une palette).</li>
+                    <li>`findAllByPackingListId(int $packingListId, ...)`: Récupère tous les colis d'une PL (via jointure sur palettes).</li>
+                    <li>`packageNumberExists(string $packageNumber)`: Vérifie l'unicité d'un `package_number`.</li>
+                    <li>`deleteById(int $id)`: "Dé-scanner" un colis.</li>
+                    <li>`moveToPalette(int $colisId, int $newPaletteId)`: Change le `palette_id` d'un colis.</li>
+                    <li>`findChildren(int $parentId)`: Retourne la liste des colis enfants d'un colis parent.</li>
+                    <li>`updateComment(int $colisId, ?string $comment)`: Met à jour le commentaire d'un colis.</li>
+                    <li>`getScannedQuantitiesBySite(...)`, `getScannedQuantitiesByPackingList(...)`, `countScannedTodayBySite(...)`: Méthodes d'agrégation pour les statistiques et le suivi des écarts.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Modèle `Setting.php`</h4>
+        <p>Gère les paramètres de l'application stockés en base de données.</p>
+        <ul>
+            <li><strong>Méthodes clés :</strong>
+                <ul>
+                    <li>`get(string $key, mixed $default = null)`: Récupère la valeur d'un paramètre.</li>
+                    <li>`set(string $key, mixed $value, ?string $description = null)`: Définit/Met à jour un paramètre.</li>
+                    <li>`getAllAsKeyValue()`, `getAllDetails()`: Pour récupérer tous les paramètres.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Modèle `DynamicCounter.php`</h4>
+        <p>Gère les compteurs séquentiels utilisés par `ReferenceGenerator`.</p>
+        <ul>
+            <li><strong>Méthodes clés :</strong>
+                <ul>
+                    <li>`getNextValue(string $counterKey)`: Récupère la valeur actuelle d'un compteur, l'incrémente, et retourne la nouvelle valeur. Gère la création du compteur avec `INSERT ... ON DUPLICATE KEY UPDATE`. La `counterKey` inclut des informations de portée (type d'entité, site, année, mois) pour assurer l'unicité et la réinitialisation des séquences.</li>
+                    <li>`resetCounter(string $counterKey, int $value = 0)`: Réinitialise un compteur.</li>
+                </ul>
+            </li>
+        </ul>
+        
+        <h4>Modèle `TheoreticalExport.php`</h4>
+        <p>Gère les données théoriques d'expédition importées.</p>
+        <ul>
+            <li><strong>Propriétés clés :</strong> `site_id`, `import_year`, `import_week`, `of_number`, `order_number`, `sku`, `expected_quantity`.</li>
+            <li><strong>Méthodes clés :</strong>
+                <ul>
+                    <li>`deleteBySiteWeek(int $siteId, int $year, int $week)`: Supprime les entrées d'un site/semaine avant un nouvel import.</li>
+                    <li>`insertBatch(array $rowsData)`: Insère un lot de données théoriques.</li>
+                    <li>`getBySiteWeek(int $siteId, int $year, int $week, array $filters = [])`: Récupère le théorique pour comparaison.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3 id="services">5.7 Services Utilitaires (<span class="filepath">src/Services/</span>)</h3>
+        <h4>Service `ReferenceGenerator.php`</h4>
+        <p>Responsable de la génération des chaînes de caractères uniques (références, codes) basées sur des patrons configurables.</p>
+        <ul>
+            <li><strong>Méthode `generate(string $patternKey, int $entityId, ?int $siteId, array $additionalPlaceholders, ?DateTimeInterface $dateContext)` :</strong>
+                <ul>
+                    <li>Récupère le patron depuis `Setting::get($patternKey)`.</li>
+                    <li>Remplace les placeholders comme `{YYYY}`, `{MM}`, `{DD}`, `{WW}` (semaine), `{ID_PL}`, `{ID_PALETTE}`, `{SITE_CODE}`.</li>
+                    <li>Gère les compteurs dynamiques (ex: `{COUNTER_YEARLY_SITE_4DIGITS}`) :
+                        <ul>
+                            <li>Construit une `counter_key` unique pour `DynamicCounter` en fonction de la portée du compteur (global, annuel, mensuel, quotidien, hebdomadaire), du type d'entité, et optionnellement du `siteId` (si `_SITE` est dans le placeholder du compteur).</li>
+                            <li>Appelle `DynamicCounter::getNextValue()` pour obtenir la prochaine valeur.</li>
+                            <li>Formate le compteur avec des zéros non significatifs (`str_pad`).</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>Service `QrCodeService.php`</h4>
+        <p>Gère la génération et la sauvegarde des images QR code en utilisant la librairie `endroid/qr-code`.</p>
+        <ul>
+            <li><strong>Constructeur :</strong> Initialise les chemins de stockage et publics pour les QR codes, vérifie/crée le dossier de stockage et vérifie l'extension GD.</li>
+            <li><strong>Méthode `generateAndSavePaletteQrCode(string $dataToEncode, string $filename, ?string $labelText)` :</strong>
+                <ul>
+                    <li>Prend les données à encoder (le code de la palette), un nom de fichier, et un label optionnel.</li>
+                    <li>Utilise la librairie `endroid/qr-code` (en instanciant directement `QrCode` et `Label`, puis en utilisant `PngWriter`) pour créer une image PNG.</li>
+                    <li>Sauvegarde l'image dans <span class="filepath">public/qrcodes/palettes/</span>.</li>
+                    <li>Retourne le chemin public URL vers l'image générée (ou `false` en cas d'échec).</li>
+                </ul>
+            </li>
+            <li><strong>`getPaletteQrCodePublicPath(string $filename)` :</strong> Retourne le chemin public d'un QR code existant.</li>
+        </ul>
+        
+        <!-- Suite dans la prochaine partie -->
+         <!-- Suite de la page HTML (après la section 5.7 Services Utilitaires) -->
+        <!-- S'assurer que les styles et le conteneur body/container sont ouverts -->
+
+        <h3 id="controllers-desc">5.8 Description des Contrôleurs (<span class="filepath">src/Controllers/</span>)</h3>
+        <p>Les contrôleurs gèrent le flux des requêtes, interagissent avec les modèles et les services, et passent les données aux vues pour l'affichage. Tous les contrôleurs (sauf potentiellement `HomeController` pour les pages publiques) héritent de `BaseController`.</p>
+
+        <h4>`AuthController.php`</h4>
+        <p>Gère le processus d'authentification.</p>
+        <ul>
+            <li><strong>`showLoginForm(Request $request)` :</strong> Affiche la page de connexion. Redirige vers le tableau de bord si l'utilisateur est déjà connecté.</li>
+            <li><strong>`login(Request $request)` :</strong> Traite les données du formulaire de connexion (username, password). Appelle `Auth::login()`. Redirige vers le tableau de bord en cas de succès, ou réaffiche le formulaire de connexion avec un message d'erreur en cas d'échec.</li>
+            <li><strong>`logout(Request $request)` :</strong> Appelle `Auth::logout()` pour déconnecter l'utilisateur et le redirige vers la page de connexion.</li>
+        </ul>
+
+        <h4>`DashboardController.php` (ou `HomeController.php` s'il gère la route `/`)</h4>
+        <p>Responsable de l'affichage du tableau de bord principal après la connexion.</p>
+        <ul>
+            <li><strong>`index(Request $request)` :</strong>
+                <ul>
+                    <li>Vérifie la permission `dashboard_view`.</li>
+                    <li>Récupère les données nécessaires pour les différents widgets du tableau de bord en fonction du rôle et du site de l'utilisateur connecté (via `Auth::user()` et `Auth::can(...)`).</li>
+                    <li>Statistiques (comptes de PL, palettes, colis) via les méthodes des modèles, filtrées par site si applicable.</li>
+                    <li>Liste des tâches en attente (ex: PL ouvertes).</li>
+                    <li>Informations sur la palette de scan active en session.</li>
+                    <li>Passe toutes ces données à la vue <span class="filepath">dashboard/index.php</span>.</li>
+                </ul>
+            </li>
+        </ul>
+        <p class="note">(`HomeController.php` peut contenir des routes de test ou des pages statiques simples, mais la logique principale du tableau de bord est dans `DashboardController`.)</p>
+
+        <h4>`UserController.php`</h4>
+        <p>Gère le CRUD des utilisateurs. L'accès est protégé par la permission `user_manage` dans le constructeur.</p>
+        <ul>
+            <li><strong>`index(Request $request)` :</strong> Affiche la liste des utilisateurs (`User::getAll()`), avec filtres par site pour l'admin. Charge les rôles et le site de chaque utilisateur pour l'affichage.</li>
+            <li><strong>`create(Request $request)` :</strong> Affiche le formulaire de création. Passe la liste des rôles et des sites actifs.</li>
+            <li><strong>`store(Request $request)` :</strong> Valide les données du formulaire, appelle `User::create()`, et `User::syncRoles()`. Gère l'assignation du `site_id`.</li>
+            <li><strong>`edit(Request $request, int $id)` :</strong> Affiche le formulaire d'édition. Charge l'utilisateur, ses rôles, tous les rôles, et tous les sites actifs.</li>
+            <li><strong>`update(Request $request, int $id)` :</strong> Valide les données, appelle `User::update()`, et `User::syncRoles()`. Gère la mise à jour du `site_id`.</li>
+            <li><strong>`delete(Request $request, int $id)` :</strong> Appelle `User::delete()` (suppression physique). Empêche l'auto-suppression.</li>
+        </ul>
+
+        <h4>`RoleController.php`</h4>
+        <p>Gère le CRUD des rôles. L'accès est protégé par `role_manage`.</p>
+        <ul>
+            <li><strong>`index(Request $request)` :</strong> Affiche la liste des rôles (`Role::getAll()`).</li>
+            <li><strong>`create(Request $request)` :</strong> Affiche le formulaire de création de rôle.</li>
+            <li><strong>`store(Request $request)` :</strong> Valide et appelle `Role::create()`.</li>
+            <li><strong>`edit(Request $request, int $id)` :</strong> Affiche le formulaire d'édition. Charge le rôle, ses permissions actuelles (`$role->loadPermissions()`), et toutes les permissions disponibles (`Permission::getAll()`) pour l'assignation.</li>
+            <li><strong>`update(Request $request, int $id)` :</strong> Valide, appelle `Role::update()`, et `Role::syncPermissions()`.</li>
+            <li><strong>`delete(Request $request, int $id)` :</strong> Appelle `Role::delete()`. Empêche la suppression de rôles protégés.</li>
+        </ul>
+
+        <h4>`PermissionController.php`</h4>
+        <p>Gère le CRUD des permissions. L'accès est protégé par `permission_manage`.</p>
+        <ul>
+            <li><strong>`index(Request $request)` :</strong> Affiche la liste des permissions (`Permission::getAll()`).</li>
+            <li><strong>`create(Request $request)` :</strong> Affiche le formulaire de création.</li>
+            <li><strong>`store(Request $request)` :</strong> Valide (y compris le format du nom de la permission) et appelle `Permission::create()`.</li>
+            <li><strong>`edit(Request $request, int $id)` :</strong> Affiche le formulaire d'édition.</li>
+            <li><strong>`update(Request $request, int $id)` :</strong> Valide et appelle `Permission::update()`.</li>
+            <li><strong>`delete(Request $request, int $id)` :</strong> Appelle `Permission::delete()`.</li>
+        </ul>
+
+        <h4>`SiteController.php`</h4>
+        <p>Gère le CRUD des sites. L'accès est protégé par `site_manage`.</p>
+        <ul>
+            <li><strong>`index(Request $request)` :</strong> Affiche la liste de tous les sites (`Site::getAll()`).</li>
+            <li><strong>`create(Request $request)` :</strong> Affiche le formulaire de création.</li>
+            <li><strong>`store(Request $request)` :</strong> Valide (unicité du code, etc.) et appelle `Site::create()`.</li>
+            <li><strong>`edit(Request $request, int $id)` :</strong> Affiche le formulaire d'édition.</li>
+            <li><strong>`update(Request $request, int $id)` :</strong> Valide et appelle `Site::update()`.</li>
+            <li><strong>`deactivateSite(Request $request, int $id)` :</strong> Appelle `Site::setActiveStatus($id, false)`. Vérifie s'il y a des PL ouvertes liées.</li>
+            <li><strong>`reactivateSite(Request $request, int $id)` :</strong> Appelle `Site::setActiveStatus($id, true)`.</li>
+            <li><strong>`forceDeleteSite(Request $request, int $id)` :</strong> Appelle `Site::forceDelete()` (utilisation prudente).</li>
+        </ul>
+
+        <h4>`SettingController.php`</h4>
+        <p>Gère les paramètres de l'application. L'accès est protégé par `settings_manage`.</p>
+        <ul>
+            <li><strong>`index(Request $request)` :</strong> Affiche le formulaire d'édition des paramètres (`Setting::getAllAsKeyValue()` ou `getAllDetails()`). Les clés des paramètres attendus et leurs descriptions sont définies dans le contrôleur.</li>
+            <li><strong>`update(Request $request)` :</strong> Sauvegarde les valeurs des paramètres postés via `Setting::set()`.</li>
+        </ul>
+
+        <h4>`PackingListController.php`</h4>
+        <p>Gère les opérations sur les Packing Lists. Les actions sont protégées par des permissions granulaires (`packinglist_create`, `packinglist_read_all`, etc.).</p>
+        <ul>
+            <li><strong>`index(Request $request)` :</strong> Affiche la liste des PL (`PackingList::getAll()`), filtrée par site en fonction des droits de l'utilisateur.</li>
+            <li><strong>`create(Request $request)` :</strong> Affiche le formulaire de création. Gère la sélection du site en fonction des droits.</li>
+            <li><strong>`store(Request $request)` :</strong> Valide les données (date, site), vérifie les droits sur le site, appelle `PackingList::create()` (qui utilise `ReferenceGenerator`).</li>
+            <li><strong>`show(Request $request, int $id)` :</strong> Affiche les détails d'une PL, y compris son site (`$pl->loadSite()`) et la liste de ses palettes (`Palette::findByPackingListId()`).</li>
+            <li><strong>`edit(Request $request, int $id)` :</strong> Affiche le formulaire pour modifier la date d'expédition (si PL ouverte).</li>
+            <li><strong>`update(Request $request, int $id)` :</strong> Met à jour la date d'expédition.</li>
+            <li><strong>`closePl(Request $request, int $id)` :</strong> Appelle `PackingList::close()`.</li>
+            <li><strong>`reopenPl(Request $request, int $id)` :</strong> Appelle `PackingList::reopen()`.</li>
+            <li><strong>`deletePl(Request $request, int $id)` :</strong> Appelle `PackingList::delete()`.</li>
+            <li><strong>`generateMultiplePalettes(Request $request, int $packingListId)` :</strong> Crée plusieurs palettes en boucle.</li>
+            <li><strong>`exportColisToXlsx(Request $request, int $packingListId)` :</strong> Exporte les colis en XLSX via `PhpSpreadsheet`.</li>
+            <li><strong>`exportColisToPdf(Request $request, int $packingListId)` :</strong> Exporte les colis en PDF via `Dompdf` et une vue HTML dédiée.</li>
+        </ul>
+
+        <h4>`PaletteController.php`</h4>
+        <p>Gère les opérations sur les palettes. Actions protégées par des permissions granulaires.</p>
+        <ul>
+            <li><strong>`storeForPackingList(Request $request, int $packingListId)` :</strong> Crée une palette pour une PL (appelle `Palette::create()`, qui utilise `ReferenceGenerator` et `QrCodeService`).</li>
+            <li><strong>`show(Request $request, int $id)` :</strong> Affiche les détails d'une palette, sa PL parente, son QR code, et la liste de ses colis (`Colis::findByPaletteId()`). Gère l'affichage du formulaire d'ouverture si la palette est `generated`.</li>
+            <li><strong>`processOpening(Request $request, int $id)` :</strong> Traite la soumission du `max_colis` et appelle `Palette::open()`.</li>
+            <li><strong>`updateMaxColis(Request $request, int $id)` :</strong> Appelle `Palette::updateMaxColis()`.</li>
+            <li><strong>`closePalette(Request $request, int $id)` :</strong> Appelle `Palette::updateFields()` pour changer le statut à `closed`.</li>
+            <li><strong>`reopenPalette(Request $request, int $id)` :</strong> Appelle `Palette::reopen()`.</li>
+            <li><strong>`delete(Request $request, int $id)` :</strong> Appelle `Palette::deleteById()` (après vérification des conditions).</li>
+            <li><strong>`printQrCodes(Request $request)` :</strong> Prépare les données et rend une vue dédiée à l'impression de plusieurs QR codes de palettes.</li>
+            <li><strong>`indexAll(Request $request)` :</strong> (Si implémenté) Affiche la liste de toutes les palettes du système, avec filtres.</li>
+        </ul>
+
+        <h4>`ColisController.php`</h4>
+        <p>Gère le scan et la recherche des colis. Actions protégées par des permissions granulaires.</p>
+        <ul>
+            <li><strong>`scanInterface(Request $request)` :</strong> Affiche l'interface de scan. Gère la palette active en session et l'affichage des derniers colis scannés.</li>
+            <li><strong>`processPaletteForScan(Request $request)` :</strong> Valide un code palette, l'ouvre via redirection vers `palettes/show/{id}` si `generated`, ou l'active en session si `open`.</li>
+            <li><strong>`deactivatePaletteScan(Request $request)` :</strong> Vide la palette active de la session.</li>
+            <li><strong>`processColisScan(Request $request)` :</strong> Reçoit le payload du QR code colis. Si le payload ne contient que `package_number`, un colis <em>parent</em> est créé et conservé comme actif. Les scans suivants deviennent des <em>enfants</em> reliés à ce parent. Dans les autres cas, le payload complet est parsé et stocké après validation (capacité palette, unicité du numéro).</li>
+            <li><strong>`deleteColis(Request $request, int $colisId)` :</strong> "Dé-scanner" un colis, appelle `Colis::deleteById()`.</li>
+            <li><strong>`showMoveForm(Request $request, int $colisId)` :</strong> (Actuellement géré via modale) Prépare l'affichage du formulaire/modale de déplacement de colis.</li>
+            <li><strong>`processMove(Request $request, int $colisId)` :</strong> Valide la palette destination et appelle `Colis::moveToPalette()`.</li>
+            <li><strong>`updateComment(Request $request, int $colisId)` :</strong> Met à jour le commentaire d'un colis.</li>
+            <li><strong>`searchColis(Request $request)` :</strong> Affiche le formulaire de recherche et les résultats. Gère le scan direct de QR code colis (JS parse le payload) et la recherche multicritères. Appelle `Colis::search()`.</li>
+        </ul>
+
+        <h4>`TheoreticalExportController.php`</h4>
+        <p>Gère l'import des données théoriques et l'affichage des écarts. Actions protégées.</p>
+        <ul>
+            <li><strong>`showImportForm(Request $request)` :</strong> Affiche le formulaire d'upload CSV, avec sélection du site.</li>
+            <li><strong>`processImport(Request $request)` :</strong> Valide le fichier et le site. Détermine l'année/semaine de l'import. Appelle `TheoreticalExport::deleteBySiteWeek()` pour purger l'ancien théorique, puis parse le CSV et appelle `TheoreticalExport::insertBatch()`.</li>
+            <li><strong>`showDeviations(Request $request)` :</strong> Affiche les écarts. Gère le contexte (globale par site/semaine/filtres ou spécifique à une `packing_list_id` passée en GET). Appelle `TheoreticalExport::getBySiteWeek()` et `Colis::getScannedQuantitiesBySite()` ou `Colis::getScannedQuantitiesByPackingList()`. Calcule et affiche les écarts.</li>
+        </ul>
+
+
+        <h2 id="frontend">6. Frontend</h2>
+        <h3 id="view-structure">6.1 Structure des Vues (<span class="filepath">src/Views/</span>)</h3>
+        <p>Les vues sont organisées en sous-dossiers par module/contrôleur (ex: <span class="filepath">users/</span>, <span class="filepath">packing_lists/</span>). Ce sont des fichiers PHP qui mélangent HTML et logique PHP simple pour l'affichage des données passées par les contrôleurs.</p>
+        <p>Les vues de contenu (ex: <span class="filepath">users/index.php</span>) ne contiennent que le HTML spécifique à leur page et sont injectées dans un layout principal.</p>
+
+        <h3 id="layouts">6.2 Layouts (<span class="filepath">src/Views/layouts/</span>)</h3>
+        <ul>
+            <li><strong>`admin_app.php` :</strong> Layout principal pour toutes les pages du back-office. Contient la structure HTML globale (doctype, head, body), inclut la barre de navigation latérale (`_admin_sidebar.php`), un header de page, la zone où le contenu spécifique (`$content`) est injecté, et un footer. Il charge également les fichiers CSS et JavaScript globaux (Bootstrap, Font Awesome, DataTables, jQuery, app.js). Gère l'affichage global des messages Flash.</li>
+            <li><strong>`print_layout.php` :</strong> Layout minimaliste utilisé pour les pages destinées à l'impression (ex: QR codes des palettes). Contient peu de styles et des contrôles d'impression.</li>
+            <li><strong>`auth_layout.php` (Optionnel) :</strong> Pourrait être utilisé pour les pages de connexion/enregistrement si elles nécessitent un style différent du layout admin. (Actuellement, `auth/login.php` est une page HTML complète autonome).</li>
+        </ul>
+        <h4>Partiel `_admin_sidebar.php`</h4>
+        <p>Contient le HTML et la logique PHP pour la barre de navigation latérale. Les liens sont affichés conditionnellement en fonction des permissions de l'utilisateur connecté (`Auth::can()`). Marque le lien actif en fonction de l'URL courante.</p>
+
+        <h3 id="javascript">6.3 JavaScript (<span class="filepath">public/js/app.js</span>)</h3>
+        <p>Le fichier <span class="filepath">public/js/app.js</span> est le point d'entrée principal pour le JavaScript personnalisé de l'application.</p>
+        <ul>
+            <li><strong>Initialisation de DataTables :</strong> Une fonction helper `initializeDataTable()` est utilisée pour appliquer DataTables aux différentes tables de l'application (identifiées par leur ID HTML), avec configuration de la langue, des boutons d'export (Copy, Excel, PDF, Print, ColVis), et des options de tri/pagination. L'extension Responsive est activée.</li>
+            <li><strong>Activation des Tooltips Bootstrap.</strong></li>
+            <li><strong>Logique spécifique à certaines pages :</strong>
+                <ul>
+                    <li><span class="filepath">colis/scan.php</span> : Script pour gérer le focus automatique sur les champs de saisie (palette puis colis) et la soumission du scan colis sur "Entrée".</li>
+                    <li><span class="filepath">packing_lists/show.php</span> : Script pour gérer la sélection des checkboxes de palettes pour l'impression.</li>
+                </ul>
+            </li>
+        </ul>
+        <p>Les librairies JS externes (jQuery, Bootstrap, DataTables et ses extensions) sont chargées via CDN dans <span class="filepath">admin_app.php</span>.</p>
+        
+        <!-- Suite dans la prochaine partie -->
+         <!-- Suite de la page HTML (après la section 6.3 JavaScript) -->
+        <!-- S'assurer que les styles et le conteneur body/container sont ouverts -->
+
+        <h2 id="key-flows">7. Flux de Données et Logiques Métier Clés</h2>
+        <p>Cette section décrit les principaux processus métier et comment ils sont implémentés.</p>
+
+        <h4>7.1 Création d'une Packing List (Multi-Sites)</h4>
+        <ol>
+            <li>L'utilisateur (Superviseur/Admin) accède à la page de création de PL (action `PackingListController::create`).</li>
+            <li>La vue <span class="filepath">packing_lists/create.php</span> s'affiche.
+                <ul>
+                    <li>Le contrôleur détermine les sites pour lesquels l'utilisateur peut créer une PL (via `getAvailableSitesForCurrentUser()`).</li>
+                    <li>Un dropdown permet de sélectionner le `site_id`.</li>
+                    <li>L'utilisateur saisit la `ship_date`.</li>
+                </ul>
+            </li>
+            <li>L'utilisateur soumet le formulaire (action `PackingListController::store`).</li>
+            <li>Le contrôleur valide les données (date, `site_id` valide et autorisé pour l'utilisateur).</li>
+            <li>Si valide, `PackingList::create(shipDate, siteId, userId)` est appelée.</li>
+            <li>Dans `PackingList::create()`:
+                <ol type="a">
+                    <li>Début de transaction.</li>
+                    <li>Insertion d'une ligne dans `packing_lists` avec une référence temporaire, le `site_id`, `ship_date`, statut 'open', et `created_by_user_id`.</li>
+                    <li>Récupération du `lastInsertId()` (ID de la nouvelle PL).</li>
+                    <li>Appel à `ReferenceGenerator::generate('packing_list_reference_pattern', lastId, siteId, siteCodePlaceholder, shipDateTime)` pour obtenir la référence finale.
+                        <ul>
+                            <li>`ReferenceGenerator` récupère le patron depuis `settings`.</li>
+                            <li>Il remplace les placeholders de date, l'ID (`{ID_PL}`), et le code du site (`{SITE_CODE}`).</li>
+                            <li>Pour les compteurs (ex: `{COUNTER_YEARLY_SITE_4DIGITS}`), il construit une `counter_key` (incluant `siteId` si `_SITE` est dans le placeholder) et appelle `DynamicCounter::getNextValue()`.</li>
+                        </ul>
+                    </li>
+                    <li>Mise à jour de la ligne `packing_lists` avec la `reference` finale.</li>
+                    <li>Commit de la transaction.</li>
+                    <li>Retourne l'objet `PackingList` créé.</li>
+                </ol>
+            </li>
+            <li>Si la création réussit, le contrôleur redirige vers la page de détail de la nouvelle PL (`packing_lists/show/{id}`).</li>
+        </ol>
+
+        <h4>7.2 Génération de Code Palette (Multi-Sites, QR Code)</h4>
+        <ol>
+            <li>Depuis la page de détail d'une PL ouverte (`packing_lists/show/{id}`), l'utilisateur clique sur "Générer Palette Unique" ou soumet le formulaire "Multi-Palettes" (action `PaletteController::storeForPackingList` ou `PackingListController::generateMultiplePalettes` qui appelle `Palette::create` en boucle).</li>
+            <li>L'action du contrôleur vérifie que la PL est ouverte et que l'utilisateur a la permission `palette_create`.</li>
+            <li>Elle appelle `Palette::create(packingListId, userId)`.</li>
+            <li>Dans `Palette::create()`:
+                <ol type="a">
+                    <li>Début de transaction.</li>
+                    <li>Récupère la PL parente pour obtenir son `site_id` et `site_code` (si le patron palette les utilise).</li>
+                    <li>Insertion d'une ligne dans `palettes` avec `packing_list_id`, statut 'generated', `created_by_user_id`, et un `code` temporaire.</li>
+                    <li>Récupération du `lastInsertId()` (ID de la nouvelle palette).</li>
+                    <li>Appel à `ReferenceGenerator::generate('palette_code_pattern', lastId, siteIdDeLaPL, siteCodeDeLaPLPlaceholder, now)` pour le code final.</li>
+                    <li>Instanciation de `QrCodeService`.</li>
+                    <li>Appel à `qrCodeService->generateAndSavePaletteQrCode(finalCode, nomFichierUnique, finalCode)` pour créer l'image PNG du QR code dans <span class="filepath">public/qrcodes/palettes/</span>. Cette méthode retourne le chemin public relatif de l'image.</li>
+                    <li>Mise à jour de la ligne `palettes` avec le `code` final et le `qr_code_path`.</li>
+                    <li>Commit de la transaction.</li>
+                    <li>Retourne l'objet `Palette` créé.</li>
+                </ol>
+            </li>
+            <li>Le contrôleur redirige vers la page de détail de la PL, qui affiche maintenant la nouvelle palette.</li>
+        </ol>
+
+        <h4>7.3 Processus de Scan de Colis</h4>
+        <p>Ce processus se déroule principalement sur la page <span class="filepath">colis/scan.php</span>.</p>
+        <ol>
+            <li><strong>Activation de la Palette :</strong>
+                <ul>
+                    <li>L'opérateur accède à `/colis/scan`.</li>
+                    <li>Il scanne/saisit le code d'une palette dans le champ dédié.</li>
+                    <li>Le formulaire est soumis à `ColisController::processPaletteForScan`.</li>
+                    <li>Le contrôleur vérifie la palette :
+                        <ul>
+                            <li>Si inexistante ou PL parente fermée : erreur.</li>
+                            <li>Si statut `closed` : erreur.</li>
+                            <li>Si statut `generated` : redirection vers `palettes/show/{id}` pour que l'opérateur l'ouvre (saisie de `max_colis` via `PaletteController::processOpening` qui appelle `Palette::open()`). L'opérateur doit ensuite revenir à l'interface de scan.</li>
+                            <li>Si statut `open` : l'ID de la palette est stocké dans `$_SESSION['active_scan_palette_id']`. Redirection vers `/colis/scan`.</li>
+                        </ul>
+                    </li>
+                    <li>La page `/colis/scan` (via `ColisController::scanInterface`) affiche les détails de la palette active (s'il y en a une) et met le focus sur le champ de scan colis.</li>
+                </ul>
+            </li>
+            <li><strong>Scan d'un Colis :</strong>
+                <ul>
+                    <li>L'opérateur scanne le QR code d'un colis dans le champ dédié. Le scanner simule une saisie clavier + "Entrée".</li>
+                    <li>Le JavaScript de la page intercepte "Entrée" et soumet le formulaire contenant le payload brut du QR code à `ColisController::processColisScan`.</li>
+                    <li>Dans `ColisController::processColisScan` :
+                        <ol type="a">
+                            <li>Vérifie qu'une palette est active en session et qu'elle est toujours `open`.</li>
+                            <li>Parse le payload brut (valeurs séparées par `;` dans un ordre fixe ou ancien format `cle|valeur;...`) en un tableau associatif.</li>
+                            <li>Reconstruit une chaîne JSON valide à partir de ce tableau pour stockage dans `payload_json`.</li>
+                            <li>Si le tableau parsé ne contient que `package_number`, un colis de type <code>parent</code> est créé et son identifiant est stocké en session.</li>
+                            <li>Les scans suivants deviennent des colis <code>product</code> avec <code>parent_colis_id</code> renseigné.</li>
+                            <li>Scanner à nouveau le même numéro met fin au groupage (le parent est "fermé").</li>
+                            <li>Dans les autres cas, le payload complet est utilisé&nbsp;: extraction de `package_number`, `of_number`, `sku`, `quantity`, etc., y compris les nouveaux champs comme `ref_interne`.</li>
+                            <li>Effectue les validations :
+                                <ul>
+                                    <li>`package_number` présent.</li>
+                                    <li>Capacité de la palette non dépassée (`Palette::getColisCount() < $activePalette->max_colis`).</li>
+                                    <li>`package_number` non déjà existant en base (`Colis::packageNumberExists()`).</li>
+                                </ul>
+                            </li>
+                            <li>Si erreurs : message flash d'erreur (potentiellement avec écran rouge via session), redirection vers `/colis/scan`.</li>
+                            <li>Si valide : prépare un tableau `$colisData` avec tous les champs (y compris `palette_id`, `scanned_by_user_id`, `scan_date_time`, `payload_json` et les champs parsés).</li>
+                            <li>Appelle `Colis::create($colisData)`.</li>
+                            <li>Message flash de succès, redirection vers `/colis/scan` pour le prochain scan.</li>
+                        </ol>
+                    </li>
+                </ul>
+            </li>
+        </ol>
+
+        <h4>7.4 Gestion des Permissions</h4>
+        <p>L'accès aux fonctionnalités est contrôlé par un système de rôles et permissions.</p>
+        <ul>
+            <li>Chaque utilisateur a un ou plusieurs rôles (`user_roles`).</li>
+            <li>Chaque rôle a une ou plusieurs permissions (`role_permissions`).</li>
+            <li>La classe `App\Lib\Auth` fournit des méthodes statiques :
+                <ul>
+                    <li>`Auth::can(string $permissionName)` : Vérifie si l'utilisateur connecté possède la permission spécifiée. Elle récupère l'objet `User` et appelle `$user->hasPermission()`.</li>
+                    <li>`User::hasPermission(string $permissionName)` : Itère sur les rôles de l'utilisateur et appelle `$role->hasPermission()` pour chaque.</li>
+                    <li>`Role::hasPermission(string $permissionName)` : Itère sur les permissions directes du rôle (après les avoir chargées via `$role->loadPermissions()`) et vérifie si le nom de la permission correspond.</li>
+                </ul>
+            </li>
+            <li>La méthode `BaseController::authorize(string $permissionName, ...)` est utilisée au début des méthodes d'action des contrôleurs pour protéger l'accès. Elle appelle `Auth::can()` et redirige si la permission est manquante.</li>
+            <li>Les vues utilisent également `Auth::can()` pour afficher ou masquer conditionnellement des liens et des boutons d'action.</li>
+        </ul>
+        <p>Les permissions "méta" (ex: `user_manage`, `role_manage`) sont utilisées dans les constructeurs des contrôleurs d'administration pour un contrôle global, tandis que des permissions plus granulaires (ex: `packinglist_create`, `palette_open`) sont utilisées pour des actions spécifiques.</p>
+
+        <h2 id="deployment">8. Déploiement et Configuration Serveur (Bases)</h2>
+        <p>Pour déployer l'application sur un serveur de production :</p>
+        <ol>
+            <li><strong>Prérequis Serveur :</strong>
+                <ul>
+                    <li>Serveur web (Apache ou Nginx).</li>
+                    <li>PHP (version 8.2+ recommandée, compte tenu des dépendances).</li>
+                    <li>Base de données MySQL ou MariaDB.</li>
+                    <li>Extension PHP : `pdo_mysql`, `gd` (pour les QR codes), `mbstring`, `json`, `intl` (pour `NotoSans` et internationalisation si besoin).</li>
+                    <li>Composer installé sur le serveur (pour `composer install --no-dev --optimize-autoloader`) ou uploader le dossier `vendor`.</li>
+                </ul>
+            </li>
+            <li><strong>Configuration Apache :</strong>
+                <ul>
+                    <li>Le `DocumentRoot` doit pointer vers le dossier <span class="filepath">public/</span> de l'application.</li>
+                    <li>`AllowOverride All` doit être activé pour le dossier `public/` afin que le fichier <span class="filepath">.htaccess</span> soit pris en compte pour la réécriture d'URL.</li>
+                    <li>`mod_rewrite` doit être activé.</li>
+                </ul>
+            </li>
+            <li><strong>Fichier de Configuration (<span class="filepath">config/config.php</span>) :</strong>
+                <ul>
+                    <li>Les constantes `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` doivent être ajustées pour l'environnement de production.</li>
+                    <li>La détection dynamique de `APP_URL` et `BASE_URL` devrait fonctionner, mais vérifiez qu'elle produit les bonnes URL pour votre domaine de production.</li>
+                    <li>**IMPORTANT :** Mettre `ini_set('display_errors', 0);` et `error_reporting(0);` (ou un niveau plus restrictif comme `E_ALL & ~E_DEPRECATED & ~E_STRICT`) pour ne pas afficher les erreurs PHP aux utilisateurs finaux. Les erreurs doivent être logguées (voir ci-dessous).</li>
+                </ul>
+            </li>
+            <li><strong>Logs en Production :</strong>
+                <ul>
+                    <li>Configurez `php.ini` pour que `log_errors = On` et que `error_log` pointe vers un fichier de log accessible mais non public.</li>
+                    <li>Vérifiez la configuration `ErrorLog` d'Apache.</li>
+                </ul>
+            </li>
+            <li><strong>Permissions des Dossiers :</strong>
+                <ul>
+                    <li>Le serveur web doit avoir les droits d'écriture sur les dossiers utilisés pour le stockage (ex: <span class="filepath">public/qrcodes/palettes/</span>) et les logs (ex: <span class="filepath">logs/</span> si vous l'utilisez).</li>
+                    <li>Les autres fichiers de l'application doivent être lisibles par le serveur web.</li>
+                </ul>
+            </li>
+            <li><strong>Composer :</strong>
+                <ul>
+                    <li>Sur le serveur, après avoir cloné/uploadé le code, exécutez `composer install --no-dev --optimize-autoloader`. L'option `--no-dev` exclut les dépendances de développement, et `--optimize-autoloader` crée un autoloader plus performant.</li>
+                </ul>
+            </li>
+            <li><strong>Sécurité :</strong>
+                <ul>
+                    <li>Assurez-vous que seul le dossier `public/` est accessible via le web.</li>
+                    <li>Utilisez HTTPS.</li>
+                    <li>Revoyez toutes les configurations de sécurité PHP et serveur.</li>
+                </ul>
+            </li>
+        </ol>
+        
+        <!-- Fin de la documentation technique -->
+        <hr>
+        <p style="text-align:center; font-style:italic;">Fin de la Documentation Technique.</p>
+
+    </div>
+</body>
+</html>

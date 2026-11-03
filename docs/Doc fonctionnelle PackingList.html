@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manuel Utilisateur - PackingList Pro</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; background-color: #f4f4f4; color: #333; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background-color: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 0 12px rgba(0,0,0,0.1); }
+        h1, h2, h3, h4 { color: #2c3e50; }
+        h1 { text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 15px; margin-bottom: 25px; }
+        h2 { border-bottom: 1px solid #eaeaea; padding-bottom: 8px; margin-top: 35px; margin-bottom: 20px; color: #3498db; }
+        h3 { margin-top: 30px; color: #34495e; }
+        h4 { margin-top: 20px; color: #7f8c8d; }
+        p { margin-bottom: 15px; }
+        ul, ol { margin-bottom: 15px; padding-left: 25px; }
+        li { margin-bottom: 8px; }
+        strong { color: #2980b9; }
+        code, .filepath { font-family: 'Courier New', Courier, monospace; background-color: #ecf0f1; padding: 3px 5px; border-radius: 4px; color: #c0392b; }
+        .note { background-color: #e8f6fd; border-left: 5px solid #3498db; padding: 15px; margin: 20px 0; border-radius: 4px; }
+        .warning { background-color: #fcf8e3; border-left: 5px solid #f0ad4e; padding: 15px; margin: 20px 0; border-radius: 4px;}
+        .toc { border: 1px solid #ddd; padding: 20px; margin-bottom: 30px; background-color: #f9f9f9; border-radius: 5px;}
+        .toc h2 { margin-top: 0; color: #333; border-bottom: none; }
+        .toc ul { list-style-type: none; padding-left: 0; }
+        .toc ul li { margin-bottom: 8px; }
+        .toc ul ul { padding-left: 20px; }
+        .toc a { text-decoration: none; color: #3498db; }
+        .toc a:hover { text-decoration: underline; }
+        .action-item { font-weight: bold; color: #27ae60; } /* Pour les actions utilisateurs */
+        .permission-tag { background-color: #95a5a6; color: white; padding: 2px 6px; font-size: 0.8em; border-radius: 3px; } /* Pour les noms de permission */
+        .role-tag { background-color: #3498db; color: white; padding: 2px 6px; font-size: 0.8em; border-radius: 3px; }
+        .status-open { color: #28a745; font-weight: bold; }
+        .status-closed { color: #6c757d; font-weight: bold; }
+        .status-generated { color: #17a2b8; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Manuel Utilisateur : PackingList Pro</h1>
+
+        <div class="toc">
+            <h2>Sommaire</h2>
+            <ul>
+                <li><a href="#chap1">Chapitre 1 : Introduction et Connexion</a>
+                    <ul>
+                        <li><a href="#chap1-1">1.1. Objectif de l'Application</a></li>
+                        <li><a href="#chap1-2">1.2. Accès et Connexion</a></li>
+                        <li><a href="#chap1-3">1.3. Rôles Utilisateurs</a></li>
+                    </ul>
+                </li>
+                <li><a href="#chap2">Chapitre 2 : Tableau de Bord</a>
+                    <ul>
+                        <li><a href="#chap2-1">2.1. Informations Générales</a></li>
+                        <li><a href="#chap2-2">2.2. Widgets pour Opérateurs</a></li>
+                        <li><a href="#chap2-3">2.3. KPIs (Superviseurs/Admins)</a></li>
+                        <li><a href="#chap2-4">2.4. Tâches en Attente (Superviseurs/Admins)</a></li>
+                        <li><a href="#chap2-5">2.5. Raccourcis d'Administration (Admins)</a></li>
+                    </ul>
+                </li>
+                <li><a href="#chap3">Chapitre 3 : Gestion des Packing Lists</a>
+                     <ul>
+                        <li><a href="#chap3-1">3.1. Visualiser la Liste</a></li>
+                        <li><a href="#chap3-2">3.2. Créer une Packing List</a></li>
+                        <li><a href="#chap3-3">3.3. Voir les Détails</a></li>
+                        <li><a href="#chap3-4">3.4. Modifier une Packing List</a></li>
+                        <li><a href="#chap3-5">3.5. Exporter les Colis</a></li>
+                    </ul>
+                </li>
+                <li><a href="#chap4">Chapitre 4 : Gestion des Palettes</a>
+                    <ul>
+                        <li><a href="#chap4-1">4.1. Générer une Palette</a></li>
+                        <li><a href="#chap4-2">4.2. Voir les Détails</a></li>
+                        <li><a href="#chap4-3">4.3. Imprimer les QR Codes</a></li>
+                    </ul>
+                </li>
+                <li><a href="#chap5">Chapitre 5 : Scan des Colis</a>
+                    <ul>
+                        <li><a href="#chap5-1">5.1. Accéder à l'Interface</a></li>
+                        <li><a href="#chap5-2">5.2. Activer une Palette</a></li>
+                        <li><a href="#chap5-3">5.3. Scanner les Colis</a></li>
+                        <li><a href="#chap5-4">5.4. "Dé-scanner" un Colis</a></li>
+                        <li><a href="#chap5-5">5.5. Regrouper des Colis (Parent/Enfants)</a></li>
+                        <li><a href="#chap5-6">5.6. Déplacer un Colis</a></li>
+                        <li><a href="#chap5-7">5.7. Commenter un Colis</a></li>
+                        <li><a href="#chap5-8">5.8. Recherche de Colis</a></li>
+                    </ul>
+                </li>
+                <li><a href="#chap6">Chapitre 6 : Import Théorique et Suivi des Écarts</a></li>
+                <li><a href="#chap7">Chapitre 7 : Administration</a>
+                     <ul>
+                        <li><a href="#chap7-1">7.1. Gestion des Utilisateurs</a></li>
+                        <li><a href="#chap7-2">7.2. Gestion des Rôles et Permissions</a></li>
+                        <li><a href="#chap7-3">7.3. Gestion des Sites</a></li>
+                        <li><a href="#chap7-4">7.4. Paramètres de l'Application</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <h2 id="chap1">Chapitre 1 : Introduction et Connexion</h2>
+        <h3 id="chap1-1">1.1. Objectif de l'Application</h3>
+        <p>L'application <strong>PackingList Pro</strong> est votre outil centralisé pour optimiser et tracer l'ensemble du processus de préparation de vos expéditions. Elle vous aide à gérer efficacement les listes de colisage (Packing Lists), les palettes, et à assurer un suivi précis des colis scannés. Grâce à son fonctionnement multi-sites, chaque entité opérationnelle peut gérer ses flux de manière indépendante tout en bénéficiant d'une plateforme unifiée.</p>
+        <p>Les objectifs principaux sont :</p>
+        <ul>
+            <li>Rationaliser la préparation des expéditions.</li>
+            <li>Garantir une traçabilité complète des palettes et des colis.</li>
+            <li>Offrir une visibilité en temps réel sur l'avancement du colisage.</li>
+            <li>Comparer les quantités réellement scannées avec les prévisions théoriques.</li>
+            <li>Fournir des indicateurs de performance pour l'amélioration continue.</li>
+        </ul>
+
+        <h3 id="chap1-2">1.2. Accès et Connexion</h3>
+        <p>Pour utiliser PackingList Pro :</p>
+        <ol>
+            <li>Ouvrez votre navigateur web (Chrome, Firefox, Edge, etc.).</li>
+            <li>Entrez l'adresse URL de l'application qui vous a été communiquée (par exemple : <code>http://votre-serveur.com/packinglist/public/</code>).</li>
+            <li>La page de connexion s'affiche. Saisissez votre <action-item>nom d'utilisateur</action-item> et votre <action-item>mot de passe</action-item> dans les champs prévus.</li>
+            <li>Cliquez sur le bouton <action-item>"Se connecter"</action-item>.</li>
+        </ol>
+        <p class="note">Si vous avez oublié vos identifiants ou rencontrez des problèmes de connexion, veuillez contacter votre superviseur ou l'administrateur de l'application.</p>
+        <p>Une fois connecté avec succès, vous serez dirigé vers votre Tableau de Bord personnalisé.</p>
+
+        <h3 id="chap1-3">1.3. Rôles Utilisateurs</h3>
+        <p>Votre accès aux différentes fonctionnalités de PackingList Pro dépend de votre rôle. Les principaux rôles sont :</p>
+        <ul>
+            <li><strong class="role-tag">Opérateur de Scan :</strong> Votre mission principale est sur le terrain. Vous utilisez l'application pour :
+                <ul>
+                    <li>Activer les palettes avant de commencer le scan.</li>
+                    <li>Scanner les QR codes des colis pour les enregistrer sur la palette active.</li>
+                    <li>Visualiser la progression du remplissage de la palette active.</li>
+                </ul>
+                Votre accès aux autres sections (création de Packing Lists, administration) est généralement limité.
+            </li>
+            <li><strong class="role-tag">Superviseur :</strong> Vous avez une vue d'ensemble des opérations de votre site. Vos responsabilités incluent :
+                <ul>
+                    <li>Créer, gérer et suivre les Packing Lists pour votre site.</li>
+                    <li>Générer et gérer les palettes.</li>
+                    <li>Suivre les performances de scan et les écarts par rapport aux prévisions théoriques.</li>
+                    <li>Potentiellement importer les fichiers d'expédition théorique.</li>
+                    <li>Vous pouvez avoir des droits pour gérer les utilisateurs de votre site.</li>
+                </ul>
+            </li>
+            <li><strong class="role-tag">Administrateur :</strong> Vous avez un accès complet à toutes les fonctionnalités de l'application sur tous les sites. Vos tâches comprennent :
+                <ul>
+                    <li>La gestion des comptes utilisateurs, de leurs rôles et de leurs permissions.</li>
+                    <li>La création et la gestion des sites opérationnels.</li>
+                    <li>La configuration globale de l'application (ex: patrons de codification).</li>
+                    <li>La supervision de toutes les activités et l'accès à tous les rapports et KPIs.</li>
+                </ul>
+            </li>
+        </ul>
+        <p>Les fonctionnalités décrites dans ce manuel peuvent donc être visibles ou non en fonction de votre rôle.</p>
+
+        <h2 id="chap2">Chapitre 2 : Tableau de Bord</h2>
+        <p>Le Tableau de Bord est votre page d'accueil personnalisée. Il est conçu pour vous donner un accès rapide aux informations et aux actions les plus importantes pour votre travail quotidien.</p>
+        
+        <h3 id="chap2-1">2.1. Informations Générales</h3>
+        <p>En haut du tableau de bord, vous trouverez :</p>
+        <ul>
+            <li>Un message de bienvenue avec votre nom.</li>
+            <li>La date et l'heure actuelles.</li>
+            <li>Un bouton d'accès rapide <action-item>"Démarrer / Reprendre Scan"</action-item> si vous avez la permission de scanner des colis.</li>
+        </ul>
+
+        <h3 id="chap2-2">2.2. Widgets pour Opérateurs</h3>
+        <p>Si votre rôle est <span class="role-tag">Opérateur de Scan</span> (ou si vous avez les permissions correspondantes) :</p>
+        <ul>
+            <li><strong>Palette de Scan Active :</strong> Si une palette est déjà active pour votre session de scan, ses informations s'affichent :
+                <ul>
+                    <li>Code de la Palette</li>
+                    <li>Référence de la Packing List associée et Site</li>
+                    <li>Progression : Nombre de colis scannés / Nombre maximal de colis attendus.</li>
+                    <li>Un bouton <action-item>"Continuer Scan"</action-item> pour retourner directement à l'interface de scan avec cette palette.</li>
+                    <li>Un bouton <action-item>"Désactiver"</action-item> pour libérer la palette active.</li>
+                </ul>
+            </li>
+            <li>Si aucune palette n'est active, un bouton <action-item>"Activer une palette"</action-item> vous mènera à l'interface de scan pour en sélectionner une.</li>
+        </ul>
+
+        <h3 id="chap2-3">2.3. KPIs et Statistiques (pour <span class="role-tag">Superviseurs</span> et <span class="role-tag">Administrateurs</span>)</h3>
+        <p>Cette section affiche des indicateurs clés de performance. Par défaut, les <span class="role-tag">Superviseurs</span> voient les statistiques de leur site de rattachement. Les <span class="role-tag">Administrateurs</span> globaux voient les statistiques de tous les sites, avec un filtre pour sélectionner un site spécifique.</p>
+        <ul>
+            <li>Nombre de Packing Lists <span class="status-open">Ouvertes</span>.</li>
+            <li>Nombre de Palettes <span class="status-open">Ouvertes</span>.</li>
+            <li>Nombre de Colis Scannés Aujourd'hui.</li>
+            <li>Nombre de Packing Lists <span class="status-closed">Fermées</span> Aujourd'hui.</li>
+            <li>Nombre de Palettes <span class="status-generated">Générées</span> (en attente d'ouverture).</li>
+        </ul>
+
+        <h3 id="chap2-4">2.4. Tâches en Attente (pour <span class="role-tag">Superviseurs</span> et <span class="role-tag">Administrateurs</span>)</h3>
+        <p>Ce widget met en évidence les actions prioritaires :</p>
+        <ul>
+            <li><strong>Packing Lists Ouvertes en Attente :</strong> Affiche les dernières Packing Lists qui sont encore ouvertes et nécessitent un traitement (préparation, scan, fermeture).
+                <ul>
+                    <li>Un lien direct vers la Packing List concernée.</li>
+                    <li>Indication du site et de la date d'expédition.</li>
+                    <li>Un lien pour <action-item>"Voir toutes les PL ouvertes"</action-item> si la liste est longue.</li>
+                </ul>
+            </li>
+            <li>Lien rapide pour <action-item>"Vérifier les Écarts de Scan"</action-item> (si vous avez la permission).</li>
+        </ul>
+
+        <h3 id="chap2-5">2.5. Raccourcis d'Administration (pour <span class="role-tag">Administrateurs</span>)</h3>
+        <p>Cette section fournit des liens directs vers les modules de configuration et de gestion du système :</p>
+        <ul>
+            <li><action-item>Gestion des Utilisateurs</action-item></li>
+            <li><action-item>Gestion des Rôles</action-item></li>
+            <li><action-item>Gestion des Permissions</action-item></li>
+            <li><action-item>Paramètres de l'Application</action-item></li>
+            <li><action-item>Gestion des Sites</action-item></li>
+            <li><action-item>Importer un Fichier Théorique</action-item></li>
+        </ul>
+
+         <!-- Suite de la page HTML (après Chapitre 2 : Tableau de Bord) -->
+        <!-- S'assurer que les styles et le conteneur body/container sont ouverts -->
+
+        <h2 id="chap3">Chapitre 3 : Gestion des Packing Lists</h2>
+        <p>Ce module est principalement utilisé par les <span class="role-tag">Superviseurs</span> et les <span class="role-tag">Administrateurs</span>. Une Packing List (PL) représente une expédition et regroupe les palettes et colis qui la composent. Chaque PL est rattachée à un site spécifique.</p>
+
+        <h3 id="chap3-1">3.1. Visualiser la Liste des Packing Lists</h3>
+        <p>Pour accéder à la liste des Packing Lists :</p>
+        <ol>
+            <li>Utilisez le lien <action-item>"Packing Lists"</action-item> dans la barre de navigation latérale (menu "Gestion Colisage").</li>
+            <li>Vous verrez un tableau listant les Packing Lists. Si vous êtes <span class="role-tag">Administrateur</span>, vous pourrez voir les PL de tous les sites et utiliser un filtre pour sélectionner un site spécifique. Si vous êtes <span class="role-tag">Superviseur</span> rattaché à un site, vous ne verrez que les PL de votre site.</li>
+        </ol>
+        <p>Le tableau affiche les informations suivantes pour chaque PL :</p>
+        <ul>
+            <li><strong>Référence :</strong> Le code unique de la PL. Cliquer dessus mène aux détails de la PL.</li>
+            <li><strong>Site :</strong> Le site opérationnel auquel la PL est rattachée.</li>
+            <li><strong>Date d'expédition :</strong> La date prévue pour l'envoi.</li>
+            <li><strong>Statut :</strong> <span class="status-open">Ouverte</span> (en cours de préparation) ou <span class="status-closed">Fermée</span> (préparation terminée).</li>
+            <li><strong>Nb Palettes :</strong> Le nombre de palettes associées à cette PL.</li>
+            <li><strong>Créée le :</strong> Date et heure de création de la PL.</li>
+            <li><strong>Actions :</strong> Des boutons d'action en fonction de votre rôle et du statut de la PL (Voir, Modifier, Fermer/Réouvrir, Supprimer).</li>
+        </ul>
+        <p class="note">Le tableau est interactif : vous pouvez trier les colonnes en cliquant sur leurs en-têtes, utiliser le champ de recherche pour filtrer rapidement, et naviguer entre les pages de résultats.</p>
+
+        <h3 id="chap3-2">3.2. Créer une Nouvelle Packing List</h3>
+        <p>Si vous avez la permission <span class="permission-tag">packinglist_create</span> :</p>
+        <ol>
+            <li>Sur la page de la liste des Packing Lists, cliquez sur le bouton <action-item><i class="fas fa-plus"></i> Créer une Packing List</action-item>.</li>
+            <li>Le formulaire de création s'affiche :
+                <ul>
+                    <li><strong>Date d'expédition :</strong> Sélectionnez la date prévue pour l'expédition (par défaut, la date du jour). Ce champ est obligatoire.</li>
+                    <li><strong>Site pour la Packing List :</strong>
+                        <ul>
+                            <li>Si vous êtes <span class="role-tag">Administrateur</span> ou un utilisateur global, sélectionnez le site concerné dans la liste déroulante. Ce champ est obligatoire.</li>
+                            <li>Si vous êtes rattaché à un seul site, ce site sera automatiquement sélectionné (et le champ pourrait ne pas être modifiable).</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <li>Cliquez sur <action-item><i class="fas fa-save"></i> Créer la Packing List</action-item>.</li>
+        </ol>
+        <p>Une référence unique sera automatiquement générée pour la nouvelle PL (ex: <code>PL-NOMDUSITE-20250525-001</code>). La PL est initialement au statut <span class="status-open">"Ouverte"</span>. Vous serez redirigé vers la page de détail de cette nouvelle PL.</p>
+
+        <h3 id="chap3-3">3.3. Voir les Détails d'une Packing List</h3>
+        <p>Pour consulter les informations complètes d'une Packing List et gérer ses palettes :</p>
+        <ol>
+            <li>Depuis la liste des Packing Lists, cliquez sur la <action-item>Référence</action-item> de la PL souhaitée (si vous avez la permission <span class="permission-tag">packinglist_read_one</span>).</li>
+            <li>La page de détail s'affiche, montrant :
+                <ul>
+                    <li>Les informations générales de la PL (Référence, Site, Date d'expédition, Statut, dates).</li>
+                    <li>Les boutons d'actions possibles sur la PL (voir ci-dessous).</li>
+                    <li>Une section listant toutes les palettes associées à cette PL.</li>
+                    <li>Des boutons pour gérer les palettes (Générer Palette, Imprimer QR Codes).</li>
+                    <li>Des boutons pour exporter la liste des colis de cette PL (XLSX, PDF).</li>
+                </ul>
+            </li>
+        </ol>
+        <h4>Actions sur la Packing List (depuis sa page de détail) :</h4>
+        <ul>
+            <li><strong>Modifier Date :</strong> (Si PL <span class="status-open">Ouverte</span> et permission <span class="permission-tag">packinglist_update</span>) Permet de changer la date d'expédition.</li>
+            <li><strong>Fermer la PL :</strong> (Si PL <span class="status-open">Ouverte</span> et permission <span class="permission-tag">packinglist_close</span>)
+                <ul>
+                    <li>Change le statut de la PL à <span class="status-closed">"Fermée"</span>.</li>
+                    <li>Toutes les palettes <span class="status-open">Ouvertes</span> et **non vides** associées à cette PL sont automatiquement passées au statut <span class="status-closed">"Fermée"</span>.</li>
+                    <li>Toutes les palettes <span class="status-generated">Générées</span> (jamais ouvertes) et **vides** associées sont supprimées.</li>
+                    <li>Une fois fermée, la PL ne peut plus être modifiée (sauf réouverture), et aucun colis/palette ne peut y être ajouté.</li>
+                </ul>
+            </li>
+            <li><strong>Réouvrir la PL :</strong> (Si PL <span class="status-closed">Fermée</span> et permission <span class="permission-tag">packinglist_reopen</span>)
+                <ul>
+                    <li>Change le statut de la PL à <span class="status-open">"Ouverte"</span>.</li>
+                    <li>Les palettes qui avaient été fermées lors de la clôture de la PL restent <span class="status-closed">"Fermées"</span> et doivent être réouvertes individuellement si nécessaire.</li>
+                </ul>
+            </li>
+            <li><strong>Supprimer la PL :</strong> (Si PL <span class="status-open">Ouverte</span> et permission <span class="permission-tag">packinglist_delete</span>)
+                <ul>
+                    <li>Conditions : La PL doit être <span class="status-open">Ouverte</span> et ne doit pas contenir de palettes <span class="status-open">Ouvertes</span> avec des colis, ni de palettes <span class="status-closed">Fermées</span>.</li>
+                    <li>Les palettes <span class="status-generated">Générées</span> (vides) associées seront supprimées avec la PL.</li>
+                    <li>Une PL <span class="status-closed">Fermée</span> ne peut généralement pas être supprimée physiquement.</li>
+                    <li>Une confirmation vous sera demandée.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3 id="chap3-4">3.4. Modifier une Packing List</h3>
+        <p>Si une Packing List est <span class="status-open">Ouverte</span> et que vous avez la permission <span class="permission-tag">packinglist_update</span> :</p>
+        <ol>
+            <li>Allez sur la page de détail de la PL.</li>
+            <li>Cliquez sur le bouton <action-item><i class="fas fa-edit"></i> Modifier Date</action-item>.</li>
+            <li>Le formulaire d'édition s'affiche. Vous pouvez y modifier la **Date d'expédition**.</li>
+            <li>Les autres informations (Référence, Site, Statut) sont affichées mais non modifiables ici.</li>
+            <li>Cliquez sur <action-item><i class="fas fa-save"></i> Mettre à jour la date d'expédition</action-item>.</li>
+        </ol>
+
+        <h3 id="chap3-5">3.5. Exporter les Colis d'une Packing List</h3>
+        <p>Depuis la page de détail d'une Packing List, si vous avez la permission (ex: <span class="permission-tag">packinglist_read_one</span> ou des permissions d'export spécifiques) :</p>
+        <ol>
+            <li>Cliquez sur le bouton <action-item><i class="fas fa-file-export"></i> Exporter Colis</action-item>.</li>
+            <li>Un menu déroulant apparaît avec les options :
+                <ul>
+                    <li><action-item>Format XLSX (Excel)</action-item></li>
+                    <li><action-item>Format PDF</action-item></li>
+                </ul>
+            </li>
+            <li>Choisissez le format souhaité. Le fichier contenant tous les colis de cette Packing List (répartis sur ses différentes palettes) sera généré et téléchargé.</li>
+        </ol>
+
+
+        <h2 id="chap4">Chapitre 4 : Gestion des Palettes</h2>
+        <p>Les palettes sont les unités physiques sur lesquelles les colis sont groupés. Elles sont toujours rattachées à une Packing List.</p>
+
+        <h3 id="chap4-1">4.1. Générer une Palette</h3>
+        <p>Pour créer une nouvelle palette, la Packing List parente doit être <span class="status-open">Ouverte</span> et vous devez avoir la permission <span class="permission-tag">palette_create</span>.</p>
+        <ol>
+            <li>Allez sur la page de détail de la Packing List concernée (<span class="filepath">/packing-lists/show/{id}</span>).</li>
+            <li>Dans la section "Palettes Associées", vous avez deux options :
+                <ul>
+                    <li><strong>Palette Unique :</strong> Cliquez sur le bouton <action-item><i class="fas fa-plus"></i> Palette Unique</action-item>. Une nouvelle palette est instantanément créée avec le statut <span class="status-generated">"Générée"</span>. Un code unique et un QR code lui sont assignés.</li>
+                    <li><strong>Multi-Palettes :</strong> Cliquez sur le bouton <action-item><i class="fas fa-cubes"></i> Multi-Palettes</action-item>. Une petite fenêtre (modale) s'ouvre. Entrez le nombre de palettes que vous souhaitez générer (ex: 5) et validez. Les palettes seront créées avec le statut <span class="status-generated">"Générée"</span>.</li>
+                </ul>
+            </li>
+            <li>La liste des palettes sur la page de la Packing List est mise à jour.</li>
+        </ol>
+
+        <h3 id="chap4-2">4.2. Voir les Détails d'une Palette</h3>
+        <p>Si vous avez la permission <span class="permission-tag">palette_read_details</span> :</p>
+        <ol>
+            <li>Depuis la liste des palettes sur la page de détail d'une Packing List, cliquez sur le <action-item>Code Palette</action-item> souhaité.</li>
+            <li>La page de détail de la palette (<span class="filepath">/palettes/show/{id}</span>) s'affiche avec :
+                <ul>
+                    <li>Les informations de la palette (Code, QR Code téléchargeable, PL parente, Site, Statut, Max Colis, Colis Scannés, dates).</li>
+                    <li>Les actions possibles sur la palette (voir ci-dessous).</li>
+                    <li>La liste de tous les colis scannés sur cette palette.</li>
+                    <li>Un bouton pour <action-item>"Scanner des Colis"</action-item> si la palette est ouverte.</li>
+                </ul>
+            </li>
+        </ol>
+        <h4>Formulaire d'Ouverture de Palette (si statut "Générée")</h4>
+        <p>Si une palette est au statut <span class="status-generated">"Générée"</span>, que sa Packing List parente est <span class="status-open">"Ouverte"</span>, et que vous avez la permission <span class="permission-tag">palette_open</span> :</p>
+        <ul>
+            <li>Un formulaire s'affiche sur la page de détail de la palette vous demandant de saisir le **"Nombre max de colis"** que cette palette peut contenir.</li>
+            <li>Entrez une valeur et cliquez sur <action-item>"Ouvrir et Enregistrer Max Colis"</action-item>.</li>
+            <li>La palette passe au statut <span class="status-open">"Ouverte"</span>, et vous pouvez commencer à y scanner des colis.</li>
+        </ul>
+        <h4>Actions sur la Palette (depuis sa page de détail) :</h4>
+        <ul>
+            <li><strong>Modifier Max Colis :</strong> (Si palette <span class="status-open">Ouverte</span> et permission <span class="permission-tag">palette_update_max_colis</span>)
+                <ul>
+                    <li>Cliquez sur l'icône <i class="fas fa-edit"></i> à côté de "Max Colis".</li>
+                    <li>Une fenêtre (modale) s'ouvre. Entrez la nouvelle valeur maximale.</li>
+                    <li>La nouvelle valeur doit être supérieure ou égale au nombre de colis déjà scannés sur la palette.</li>
+                </ul>
+            </li>
+            <li><strong>Fermer Palette :</strong> (Si palette <span class="status-open">Ouverte</span> et permission <span class="permission-tag">palette_close</span>)
+                <ul>
+                    <li>Cliquez sur <action-item><i class="fas fa-lock"></i> Fermer</action-item>.</li>
+                    <li>La palette passe au statut <span class="status-closed">"Fermée"</span>. Aucun nouveau scan de colis n'est possible.</li>
+                </ul>
+            </li>
+            <li><strong>Réouvrir Palette :</strong> (Si palette <span class="status-closed">Fermée</span>, PL parente <span class="status-open">Ouverte</span>, et permission <span class="permission-tag">palette_reopen</span>)
+                <ul>
+                    <li>Cliquez sur <action-item><i class="fas fa-undo"></i> Réouvrir</action-item>.</li>
+                    <li>La palette repasse au statut <span class="status-open">"Ouverte"</span>. Le scan est à nouveau possible.</li>
+                </ul>
+            </li>
+            <li><strong>Supprimer Palette :</strong> (Si permission <span class="permission-tag">palette_delete</span> et conditions remplies)
+                <ul>
+                    <li>Conditions : La palette doit être soit <span class="status-generated">"Générée"</span> (et donc vide), soit <span class="status-open">"Ouverte"</span> ET **vide** (aucun colis scanné).</li>
+                    <li>Une palette <span class="status-closed">"Fermée"</span> ou <span class="status-open">"Ouverte"</span> avec des colis ne peut pas être supprimée directement.</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h3 id="chap4-3">4.3. Imprimer les QR Codes des Palettes</h3>
+        <p>Pour imprimer les étiquettes QR code pour une ou plusieurs palettes d'une Packing List (nécessite la permission <span class="permission-tag">palette_read_details</span> ou une permission d'impression dédiée) :</p>
+        <ol>
+            <li>Allez sur la page de détail de la Packing List concernée.</li>
+            <li>Dans la section "Palettes Associées", un tableau liste les palettes. Cochez la case à gauche des palettes dont vous voulez imprimer le QR code. Vous pouvez utiliser la case "Tout sélectionner" dans l'en-tête du tableau.</li>
+            <li>Cliquez sur le bouton <action-item><i class="fas fa-print"></i> Imprimer QR</action-item>.</li>
+            <li>Une fenêtre (modale) "Imprimer les QR Codes des Palettes" s'ouvre. Vous pouvez y ajuster :
+                <ul>
+                    <li>Largeur et Hauteur de l'étiquette (en mm).</li>
+                    <li>Nombre de QR codes par ligne sur la page d'impression.</li>
+                    <li>Taille du QR code lui-même sur l'étiquette (en mm).</li>
+                    <li>Option pour inclure le code de la palette en texte sous le QR code.</li>
+                </ul>
+            </li>
+            <li>Cliquez sur <action-item><i class="fas fa-print"></i> Préparer l'impression</action-item>.</li>
+            <li>Une nouvelle page/onglet s'ouvre avec les QR codes des palettes sélectionnées, formatés selon vos spécifications.</li>
+            <li>Utilisez la fonction d'impression de votre navigateur (Ctrl+P ou Cmd+P) pour imprimer cette page sur vos étiquettes. Assurez-vous que les paramètres de votre imprimante (taille du papier, marges "aucune" ou "minimales") correspondent à vos étiquettes.</li>
+        </ol>
+        <p class="note">L'application génère une page optimisée pour l'impression. L'ajustement final pour l'alignement sur les étiquettes physiques se fait via les paramètres du dialogue d'impression de votre navigateur et les réglages de votre imprimante d'étiquettes.</p>
+
+        <!-- La suite (Chapitre 5 : Scan des Colis, etc.) sera dans la prochaine partie -->
+          <!-- Suite de la page HTML (après Chapitre 4 : Gestion des Palettes) -->
+        <!-- S'assurer que les styles et le conteneur body/container sont ouverts -->
+
+        <h2 id="chap5">Chapitre 5 : Scan des Colis</h2>
+        <p>Cette section est cruciale, en particulier pour les <span class="role-tag">Opérateurs de Scan</span>. Elle décrit comment enregistrer les colis sur les palettes en utilisant leurs QR codes.</p>
+
+        <h3 id="chap5-1">5.1. Accéder à l'Interface de Scan</h3>
+        <p>Si vous avez la permission <span class="permission-tag">colis_scan</span> :</p>
+        <ul>
+            <li>Vous pouvez accéder à l'interface de scan via le lien <action-item>"Scan Colis"</action-item> dans la barre de navigation latérale (menu "Gestion Colisage").</li>
+            <li>Ou, si vous êtes sur la page de détail d'une palette <span class="status-open">Ouverte</span>, un bouton <action-item><i class="fas fa-qrcode"></i> Scanner des Colis</action-item> (ou similaire) vous y mènera directement, en activant cette palette pour le scan.</li>
+        </ul>
+        <p>L'URL de cette interface est typiquement <span class="filepath">/colis/scan</span>.</p>
+
+        <h3 id="chap5-2">5.2. Étape 1 : Activer une Palette pour le Scan</h3>
+        <p>Avant de pouvoir scanner des colis, vous devez indiquer à l'application sur quelle palette vous travaillez.</p>
+        <ol>
+            <li>Si vous n'êtes pas arrivé sur cette page via un lien direct depuis une palette spécifique, le curseur sera positionné dans le champ <action-item>"Scanner ou saisir le code de la palette"</action-item>.</li>
+            <li><action-item>Scannez le QR code</action-item> de la palette physique que vous souhaitez utiliser. Le code de la palette devrait apparaître dans le champ.</li>
+            <li>Alternativement, vous pouvez <action-item>taper manuellement</action-item> le code de la palette.</li>
+            <li>Cliquez sur le bouton <action-item><i class="fas fa-power-off"></i> Activer Palette</action-item>.</li>
+        </ol>
+        <h4>Résultat de l'Activation :</h4>
+        <ul>
+            <li><strong>Palette Inexistante ou Fermée :</strong> Si le code scanné ne correspond à aucune palette ou si la palette est au statut <span class="status-closed">"Fermée"</span>, un message d'erreur s'affichera, et vous devrez essayer un autre code.</li>
+            <li><strong>Packing List Parente Fermée :</strong> Si la Packing List à laquelle appartient la palette est <span class="status-closed">"Fermée"</span>, vous ne pourrez pas activer la palette pour le scan. Un message d'erreur vous l'indiquera.</li>
+            <li><strong>Palette "Générée" (Premier Usage) :</strong>
+                <ul>
+                    <li>Si la palette est au statut <span class="status-generated">"Générée"</span> (c'est-à-dire qu'elle vient d'être créée et n'a jamais été utilisée pour le scan), vous serez redirigé vers la page de détail de cette palette.</li>
+                    <li>Sur cette page de détail, un formulaire vous demandera de <action-item>saisir le "Nombre max de colis"</action-item> que cette palette peut contenir.</li>
+                    <li>Une fois le nombre max de colis enregistré, la palette passera au statut <span class="status-open">"Ouverte"</span>.</li>
+                    <li>Vous devrez alors <action-item>retourner à l'interface de scan</action-item> (via le lien "Scanner des Colis" sur la page de la palette ou le menu) et <action-item>ré-activer cette palette</action-item> (qui sera maintenant ouverte).</li>
+                </ul>
+            </li>
+            <li><strong>Palette "Ouverte" (Succès) :</strong>
+                <ul>
+                    <li>Si la palette est trouvée et est déjà au statut <span class="status-open">"Ouverte"</span> (et que sa PL parente est aussi ouverte), un message de succès s'affichera : <span class="action-item">"Palette [CODE_PALETTE] activée pour le scan."</span></li>
+                    <li>Une section "Palette Active" apparaîtra, affichant :
+                        <ul>
+                            <li>Le code de la palette active.</li>
+                            <li>Son statut (Ouverte).</li>
+                            <li>Le nombre maximal de colis défini.</li>
+                            <li>Le nombre de colis déjà scannés sur cette palette.</li>
+                            <li>La référence de la Packing List parente.</li>
+                        </ul>
+                    </li>
+                    <li>Le champ pour scanner les colis (voir Étape 2) devient disponible et le curseur s'y positionne automatiquement.</li>
+                </ul>
+            </li>
+        </ul>
+        <p>Si une palette est déjà active et que vous souhaitez en changer, vous pouvez cliquer sur le bouton <action-item><i class="fas fa-ban"></i> Désactiver Palette Actuelle</action-item> pour revenir à l'étape de sélection.</p>
+
+        <h3 id="chap5-3">5.3. Étape 2 : Scanner les Colis</h3>
+        <p>Une fois qu'une palette est active :</p>
+        <ol>
+            <li>Le curseur est positionné dans le champ <action-item>"Scanner le QR code du colis ici..."</action-item>.</li>
+            <li><action-item>Scannez le QR code</action-item> imprimé sur l'étiquette du colis.</li>
+            <li>Le contenu du QR code (qui est une chaîne de texte contenant plusieurs informations sur le colis, séparées par des `|` et des `;`) s'affiche dans le champ.</li>
+            <li>L'application soumet automatiquement ce scan (généralement, votre lecteur de code-barres simule une pression sur la touche "Entrée" après le scan).</li>
+        </ol>
+        <h4>Traitement et Validation du Scan Colis :</h4>
+        <p>L'application effectue plusieurs vérifications :</p>
+        <ul>
+            <li>La palette active est toujours valide et ouverte.</li>
+            <li>Le format du QR code scanné est correct (peut être parsé en clé/valeur).</li>
+            <li>Le **Numéro de Colis** (`package_number`) extrait du QR code est présent.</li>
+            <li>La **capacité maximale** de la palette active n'est pas dépassée.</li>
+            <li>Le **Numéro de Colis** (`package_number`) n'a **pas déjà été scanné** auparavant dans toute l'application (il doit être unique).</li>
+            <li>La quantité dans le colis (si présente dans le QR) est valide.</li>
+        </ul>
+        <h4>Feedback du Scan :</h4>
+        <ul>
+            <li><strong>En Cas de Succès :</strong>
+                <ul>
+                    <li>Un message vert s'affiche brièvement : <span class="action-item">"Colis [NUMERO_COLIS] scanné et ajouté à la palette [CODE_PALETTE]."</span></li>
+                    <li>Le colis est enregistré en base de données et lié à la palette active.</li>
+                    <li>Le compteur "Colis Scannés" de la palette active est mis à jour.</li>
+                    <li>La liste des "5 Derniers Colis Scannés sur cette Palette" (si affichée) est mise à jour.</li>
+                    <li>Le champ de scan est vidé et le curseur s'y repositionne automatiquement, prêt pour le prochain scan.</li>
+                </ul>
+            </li>
+            <li><strong>En Cas d'Erreur :</strong>
+                <ul>
+                    <li>Un message d'erreur rouge s'affiche, expliquant le problème (ex: "Palette pleine", "Numéro de colis déjà scanné : XYZ", "Format du QR code colis invalide").</li>
+                    <li>Pour les erreurs critiques (palette pleine, colis doublon, format invalide), **le fond de l'écran entier devient rouge vif** pour alerter immédiatement l'opérateur.</li>
+                    <li>Le contenu du QR code scanné (qui a causé l'erreur) reste affiché dans le champ de scan pour que l'opérateur puisse le voir.</li>
+                    <li>L'interface reste sur la même palette active.</li>
+                    <li>Le curseur revient au champ de scan.</li>
+                </ul>
+            </li>
+        </ul>
+        <p class="warning"><strong>Attention :</strong> Si l'écran devient rouge, arrêtez le scan, lisez attentivement le message d'erreur, et corrigez le problème (ex: prendre une nouvelle palette si pleine, vérifier si le colis n'a pas déjà été scanné par erreur) avant de continuer.</p>
+
+        <h3 id="chap5-4">5.4. "Dé-scanner" un Colis (Retirer un Colis d'une Palette)</h3>
+        <p>Cette action est généralement réservée aux <span class="role-tag">Superviseurs</span> ou <span class="role-tag">Administrateurs</span> et nécessite la permission <span class="permission-tag">colis_delete</span>.</p>
+        <p>Si un colis a été scanné par erreur sur une palette :</p>
+        <ol>
+            <li>Allez sur la page de détail de la palette concernée (<span class="filepath">/palettes/show/{id}</span>).</li>
+            <li>Dans la liste "Colis sur cette Palette", localisez le colis à retirer.</li>
+            <li>Si la palette est toujours <span class="status-open">Ouverte</span>, un bouton <action-item><i class="fas fa-times"></i></action-item> (ou "Dé-scanner") sera visible à côté du colis.</li>
+            <li>Cliquez sur ce bouton. Une demande de confirmation apparaîtra.</li>
+            <li>Confirmez la suppression. Le colis sera retiré de la palette et de la base de données.</li>
+        </ol>
+        <p class="note">Un colis ne peut être dé-scanné que si sa palette est encore <span class="status-open">"Ouverte"</span>.</p>
+
+        <h3 id="chap5-5">5.5. Regrouper des Colis (Parent/Enfants)</h3>
+        <p>Dans certaines situations, plusieurs colis physiques sont liés entre eux (ex&nbsp;: un carton principal et des sous-colis). L'application permet de les regrouper en scannant d'abord un <strong>colis parent</strong>, puis ses <strong>colis enfants</strong>.</p>
+        <ol>
+            <li>Scannez un QR code contenant uniquement le champ <code>package_number</code>&nbsp;: un nouveau colis parent est créé sur la palette active.</li>
+            <li>Tous les scans suivants sont enregistrés comme <em>enfants</em> tant que ce parent reste actif. Ils héritent du parent et n'occupent pas de place supplémentaire dans la capacité de la palette.</li>
+            <li>Pour terminer le groupage, re-scannez le numéro du parent ou cliquez sur <action-item>Terminer le groupage</action-item> s'il est proposé.</li>
+        </ol>
+        <p>Sur la page de détail d'une palette, les colis sont affichés avec leurs éventuels enfants pour une lecture plus claire.</p>
+
+        <h3 id="chap5-6">5.6. Déplacer un Colis</h3>
+        <p>Avec la permission <span class="permission-tag">colis_move</span>, il est possible de transférer un colis (ou un groupe parent/enfants) vers une autre palette ouverte.</p>
+        <ol>
+            <li>Depuis la liste des colis d'une palette ouverte, cliquez sur l'icône <i class="fas fa-arrows-alt"></i> à côté du colis.</li>
+            <li>Indiquez le code de la palette de destination (qui doit être ouverte et différente de la palette source).</li>
+            <li>Validez&nbsp;: le colis (et ses enfants éventuels) est déplacé vers la nouvelle palette.</li>
+        </ol>
+
+        <h3 id="chap5-7">5.7. Commenter un Colis</h3>
+        <p>Les utilisateurs disposant de la permission <span class="permission-tag">colis_update_comment</span> peuvent ajouter ou modifier un commentaire libre sur un colis depuis la page de la palette.</p>
+
+        <h3 id="chap5-8">5.8. Recherche de Colis</h3>
+        <p>Le menu <action-item>"Recherche Colis"</action-item> permet de retrouver un colis par numéro, SKU, OF, date de scan ou texte libre. Des filtres par site et statut de palette sont disponibles. Plusieurs termes peuvent être saisis dans la recherche libre, séparés par des espaces.</p>
+
+        <h2 id="chap6">Chapitre 6 : Import Théorique et Suivi des Écarts</h2>
+        <p>Ce module (permissions <span class="permission-tag">theoretical_import_csv</span> et <span class="permission-tag">theoretical_view_deviations</span>) vous permet de comparer les quantités de colis attendues avec celles réellement scannées.</p>
+        <h3 id="chap6-1">6.1. Importer un Fichier Théorique</h3>
+        <p>Le "théorique" représente les quantités d'articles (SKU) attendues pour chaque Ordre de Fabrication (OF) et Commande, pour un site et une semaine donnés.</p>
+        <ol>
+            <li>Accédez à <action-item>"Importer Théorique"</action-item> depuis le menu (ou le tableau de bord si Admin).</li>
+            <li>Le formulaire d'import s'affiche :
+                <ul>
+                    <li><strong>Pour quel Site ? :</strong> Sélectionnez le site concerné par cet import.</li>
+                    <li><strong>Fichier CSV Théorique :</strong> Cliquez pour choisir le fichier CSV sur votre ordinateur. Le fichier doit contenir les colonnes : <code>OF_NUMBER</code>, <code>ORDER_NUMBER</code>, <code>SKU</code>, <code>EXPECTED_QUANTITY</code>. Le séparateur attendu est le point-virgule (`;`).</li>
+                </ul>
+            </li>
+            <li>Cliquez sur <action-item><i class="fas fa-upload"></i> Importer et Remplacer Théorique Semaine</action-item>.</li>
+        </ol>
+        <p class="warning"><strong>Important :</strong> L'importation d'un nouveau fichier pour un site donné **écrasera toutes les données théoriques précédemment importées pour la semaine en cours** pour ce même site. La "semaine en cours" est déterminée par la date à laquelle vous effectuez l'import.</p>
+        <p>Après l'import, un message confirmera le nombre de lignes traitées. Si des erreurs sont détectées dans certaines lignes du fichier CSV (données manquantes, quantité invalide), ces lignes seront ignorées et un résumé des erreurs pourra être affiché.</p>
+
+        <h3 id="chap6-2">6.2. Suivi des Écarts</h3>
+        <p>Cette section vous permet de voir où se situent les différences entre ce qui était attendu (le théorique) et ce qui a été réellement scanné.</p>
+        <h4>Accès aux Écarts :</h4>
+        <ul>
+            <li><strong>Depuis une Packing List :</strong> Sur la page de détail d'une Packing List (<span class="filepath">/packing-lists/show/{id}</span>), cliquez sur le bouton <action-item><i class="fas fa-balance-scale"></i> Voir Écarts</action-item>. Cela affichera les écarts spécifiquement pour les colis de cette PL, en utilisant le théorique qui était actif pour le site de la PL et la semaine de sa date d'expédition.</li>
+            <li><strong>Vue Globale des Écarts :</strong> Depuis le menu (ou tableau de bord), accédez à <action-item>"Suivi des Écarts"</action-item> (<span class="filepath">/theoretical-exports/deviations</span>).</li>
+        </ul>
+        <h4>Interface de Suivi des Écarts :</h4>
+        <p>La page affiche une série de filtres et un tableau de résultats :</p>
+        <ul>
+            <li><strong>Filtres :</strong>
+                <ul>
+                    <li><strong>Site :</strong> Obligatoire (sauf si vous venez d'une PL spécifique). Sélectionnez le site à analyser.</li>
+                    <li><strong>Année et Semaine :</strong> Sélectionnez l'année et le numéro de semaine (ISO) du théorique que vous souhaitez utiliser pour la comparaison. Par défaut, la semaine actuelle est proposée. Des boutons "< Sem. Préc." et "Sem. Suiv. >" permettent de naviguer.</li>
+                    <li><strong>N° OF, N° Commande, SKU :</strong> Filtres optionnels pour affiner la recherche.</li>
+                </ul>
+                Cliquez sur <action-item><i class="fas fa-search"></i> Afficher</action-item> pour lancer la comparaison.
+            </li>
+            <li><strong>Tableau des Résultats :</strong>
+                <ul>
+                    <li>Colonnes : OF, Commande, SKU, Qté Attendue (théorique), Qté Scannée, Écart, Statut Écart.</li>
+                    <li><strong>Écart :</strong> `Scanné - Attendu`. Un nombre négatif indique un manquant, un positif un surplus.</li>
+                    <li><strong>Statut Écart et Couleurs :</strong>
+                        <ul>
+                            <li><span class="badge bg-success">COMPLET</span> : Attendu = Scanné (et > 0).</li>
+                            <li><span class="badge bg-danger">MANQUANT</span> : Scanné < Attendu.</li>
+                            <li><span class="badge bg-danger">MANQUANT TOTAL</span> : Attendu > 0 mais Scanné = 0.</li>
+                            <li><span class="badge bg-warning">SURPLUS</span> : Scanné > Attendu.</li>
+                            <li><span class="badge bg-info text-dark">SCAN (NON ATT.)</span> : Attendu = 0 mais Scanné > 0.</li>
+                            <li><span class="badge bg-light text-dark">N/A</span> : Attendu = 0 et Scanné = 0.</li>
+                        </ul>
+                        Les lignes du tableau sont aussi colorées pour une identification rapide des problèmes.
+                    </li>
+                    <li>Le tableau est interactif (tri, recherche dans les résultats, pagination).</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h2 id="chap7">Chapitre 7 : Administration</h2>
+        <p>Ces fonctionnalités sont généralement réservées aux <span class="role-tag">Administrateurs</span> et parfois aux <span class="role-tag">Superviseurs</span>, en fonction des permissions qui leur sont attribuées. Elles sont accessibles depuis les liens dans la barre de navigation latérale.</p>
+
+        <h3 id="chap7-1">7.1. Gestion des Utilisateurs (<span class="filepath">/users</span>)</h3>
+        <p>(Nécessite la permission <span class="permission-tag">user_manage</span>)</p>
+        <ul>
+            <li>Afficher la liste de tous les utilisateurs avec leur site de rattachement et leurs rôles.</li>
+            <li>Filtrer les utilisateurs par site.</li>
+            <li><action-item>Créer</action-item> de nouveaux utilisateurs : définir nom d'utilisateur, email, mot de passe, prénom, nom, statut (actif/inactif), site de rattachement, et assigner des rôles.</li>
+            <li><action-item>Modifier</action-item> les informations d'un utilisateur existant.</li>
+            <li><action-item>Désactiver</action-item> ou <action-item>Réactiver</action-item> un compte utilisateur.</li>
+            <li>(Attention) <action-item>Supprimer</action-item> physiquement un utilisateur (généralement non recommandé, la désactivation est préférable).</li>
+        </ul>
+
+        <h3 id="chap7-2">7.2. Gestion des Rôles et Permissions</h3>
+        <h4>Gestion des Rôles (<span class="filepath">/roles</span>)</h4>
+        <p>(Nécessite la permission <span class="permission-tag">role_manage</span>)</p>
+        <ul>
+            <li>Afficher la liste de tous les rôles.</li>
+            <li><action-item>Créer</action-item> un nouveau rôle (nom, description).</li>
+            <li><action-item>Modifier</action-item> un rôle existant : changer son nom, sa description, et surtout **assigner ou retirer des permissions** à ce rôle via une liste de cases à cocher.</li>
+            <li><action-item>Supprimer</action-item> un rôle (certains rôles système comme "Administrateur" peuvent être protégés contre la suppression).</li>
+        </ul>
+        <h4>Gestion des Permissions (<span class="filepath">/permissions</span>)</h4>
+        <p>(Nécessite la permission <span class="permission-tag">permission_manage</span>)</p>
+        <ul>
+            <li>Afficher la liste de toutes les permissions disponibles dans l'application.</li>
+            <li><action-item>Créer</action-item> une nouvelle permission (nom/code unique et description). Cela est généralement fait par les développeurs lors de l'ajout de nouvelles fonctionnalités, mais l'interface existe.</li>
+            <li><action-item>Modifier</action-item> la description d'une permission. Le nom/code n'est généralement pas modifiable car le code source s'y réfère.</li>
+            <li><action-item>Supprimer</action-item> une permission (avec prudence, si elle n'est plus utilisée nulle part).</li>
+        </ul>
+
+        <h3 id="chap7-3">7.3. Gestion des Sites (<span class="filepath">/sites</span>)</h3>
+        <p>(Nécessite la permission <span class="permission-tag">site_manage</span>)</p>
+        <ul>
+            <li>Afficher la liste de tous les sites (actifs et inactifs).</li>
+            <li><action-item>Créer</action-item> un nouveau site : définir un code unique, un nom, une adresse (optionnelle), et son statut (actif/inactif).</li>
+            <li><action-item>Modifier</action-item> les informations d'un site existant.</li>
+            <li><action-item>Désactiver</action-item> un site : Un site désactivé ne peut plus être sélectionné pour de nouvelles Packing Lists ou de nouveaux imports théoriques. Les données existantes liées à ce site sont conservées. La désactivation peut être empêchée si des Packing Lists ouvertes sont encore rattachées au site.</li>
+            <li><action-item>Réactiver</action-item> un site précédemment désactivé.</li>
+        </ul>
+
+        <h3 id="chap7-4">7.4. Paramètres de l'Application (<span class="filepath">/settings</span>)</h3>
+        <p>(Nécessite la permission <span class="permission-tag">settings_manage</span>)</p>
+        <ul>
+            <li>Cette page permet de configurer des paramètres globaux de l'application.</li>
+            <li>Principalement, vous pouvez y définir les **patrons de codification** utilisés pour générer automatiquement :
+                <ul>
+                    <li>Les références des Packing Lists (ex: <code>PL-{SITE_CODE}-{YYYY}{MM}{DD}-{ID_PL}</code>).</li>
+                    <li>Les codes des Palettes (ex: <code>PAL-{SITE_CODE}-{YYYY}{MM}-{COUNTER_MONTHLY_SITE_3DIGITS}</code>).</li>
+                </ul>
+                Une liste des placeholders disponibles (comme `{YYYY}`, `{MM}`, `{SITE_CODE}`, `{ID_PL}`, `{COUNTER_...}`) est fournie pour vous aider à construire ces patrons.
+            </li>
+            <li>D'autres paramètres globaux pourraient être ajoutés ici à l'avenir.</li>
+        </ul>
+        <hr>
+        <p style="text-align:center; font-style:italic;">Fin du Manuel Utilisateur.</p>
+    </div>
+</body>
+</html>
