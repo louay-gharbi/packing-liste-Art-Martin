@@ -11,6 +11,8 @@ use App\Models\User; // Pour récupérer l'utilisateur créateur si besoin
 use DateTime; // Pour la manipulation des dates
 use App\Models\Palette;
 use App\Models\Site;
+use App\Models\Reception;
+use App\Models\OrderBlc;
 // Pour PhpSpreadsheet (XLSX)
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -50,11 +52,11 @@ class PackingListController extends BaseController
 
         if ($currentUser->hasRole('Administrateur') || $currentUser->site_id === null) {
             // L'administrateur ou un utilisateur global (non rattaché à un site) peut voir/choisir parmi tous les sites actifs.
-            $availableSites = Site::getAllActive();
+            $availableSites = Site::getAllActiveProduction();
         } elseif ($currentUser->site_id !== null) {
             // L'utilisateur est rattaché à un site spécifique.
             $site = Site::findById($currentUser->site_id);
-            if ($site && $site->is_active) {
+            if ($site && $site->is_active && !$site->isReceptionSite()) {
                 // Il ne peut créer des PL que pour son propre site (s'il est actif).
                 $availableSites = [$site];
             }
@@ -76,7 +78,7 @@ class PackingListController extends BaseController
 
         $currentUser = Auth::user();
         $filters = [];
-        $availableSitesForFilter = Site::getAllActive(); // Sites pour le dropdown de filtre
+        $availableSitesForFilter = Site::getAllActiveProduction(); // Sites pour le dropdown de filtre
 
         // Déterminer le site_id pour le filtre
         $filterSiteId = $request->get('filter_site_id');
@@ -160,6 +162,7 @@ class PackingListController extends BaseController
         } else {
             $site = Site::findById($siteId);
             if (!$site || !$site->is_active) { $errors['site_id'] = 'Le site sélectionné est invalide ou inactif.';}
+            elseif ($site->isReceptionSite()) { $errors['site_id'] = 'Un site de réception ne peut pas porter de Packing List.'; }
         }
         
         $currentUser = Auth::user();
@@ -230,7 +233,8 @@ class PackingListController extends BaseController
                 'palettes' => $palettes,
                 'totalScannedQuantityPL' => $totalScannedQuantityPL, 
                 'quantitiesByPalette' => $quantitiesByPalette,
-                'aggregationSummary' => $aggregationSummary // Transmis à la vue
+                'aggregationSummary' => $aggregationSummary, // Transmis à la vue
+                'reception' => Reception::findByPackingListId($id) // Réception France éventuelle (lecture seule)
             ];
             
             return $this->view('packing_lists/show.php', $data);
@@ -465,6 +469,11 @@ class PackingListController extends BaseController
         }
         if ($r = $this->denyIfNotAccessible($pl, '/packing-lists')) return $r;
 
+        if (Reception::findByPackingListId($id) !== null) {
+            $this->flash(FLASH_ERROR, 'La Packing List "' . htmlspecialchars($pl->reference) . '" est en cours de réception / réceptionnée : réouverture impossible.');
+            return $this->redirect('/packing-lists/show/' . $id);
+        }
+
         if (PackingList::reopen($id)) {
             $this->flash(FLASH_SUCCESS, 'Packing List "' . htmlspecialchars($pl->reference) . '" réouverte avec succès.');
         } else {
@@ -609,6 +618,7 @@ class PackingListController extends BaseController
         $sheet->getStyle('A' . $headerRow . ':' . $sheet->getHighestDataColumn() . $headerRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
 
+        $blcMap = OrderBlc::getMap(array_map(fn($c) => $c->order_number, $colisList));
         $currentRow = $headerRow + 1;
         foreach ($colisList as $colis) {
             $paletteCode = $colis->palette_code ?? null;
@@ -639,7 +649,7 @@ class PackingListController extends BaseController
                     ExportSanitizer::cell($colis->order_number ?? ''),
                     ExportSanitizer::cell($colis->line_number ?? ''),
                     ExportSanitizer::cell($colis->internal_reference ?? ''),
-                    '',
+                    ExportSanitizer::cell($blcMap[(string)$colis->order_number] ?? ''),
                     ExportSanitizer::cell($colis->client_name ?? ''),
                     ExportSanitizer::cell($colis->postal_code ?? ''),
                     ExportSanitizer::cell($colis->article_reference ?? ''),
@@ -719,6 +729,23 @@ class PackingListController extends BaseController
             }
         }
 
+        // Récapitulatif : mêmes règles que l'export XLSX (exportColisToXlsx).
+        $paletteCodes = [];
+        $totalQuantity = 0;
+        foreach ($colisList as $colis) {
+            if ($colis->palette_code) {
+                $paletteCodes[] = $colis->palette_code;
+            }
+            if (is_numeric($colis->quantity)) {
+                $totalQuantity += (int)$colis->quantity;
+            }
+        }
+        $summaryData = [
+            'total_palettes' => count(array_unique($paletteCodes)),
+            'total_colis' => count(array_filter($colisList, fn($c) => $c->parent_colis_id === null)),
+            'total_quantity' => $totalQuantity,
+        ];
+
         // Trier par code palette puis numéro de colis parent (ou numéro courant)
         usort($colisList, function ($a, $b) {
             $keyA = ($a->palette_code ?? '') . '|' . ($a->parent_package_number ?: $a->package_number) . '|' . $a->package_number;
@@ -747,6 +774,7 @@ class PackingListController extends BaseController
             'colisList' => $colisList,
             'childrenByParent' => $childrenByParent,
             'summaryData' => $summaryData,
+            'blcMap' => OrderBlc::getMap(array_map(fn($c) => $c->order_number, $colisList)),
             'appName' => APP_NAME,
             'currentDate' => (new \DateTime())->format('d/m/Y H:i'),
             // Passer baseUrl et appName si votre vue partielle les utilise, sinon pas nécessaire pour Dompdf

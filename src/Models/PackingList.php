@@ -21,6 +21,7 @@ class PackingList
     public string $created_at;
     public string $updated_at;
     public ?Site $site = null;
+    public ?string $reception_status = null; // Statut de la réception France (rempli par getAll())
 
     /**
      * Garde d'appartenance par site. Cloisonne l'accès aux non-administrateurs
@@ -127,8 +128,9 @@ class PackingList
         // CORRECTION : Sélection explicite des colonnes avec des alias pour éviter toute ambiguïté
         $sql = "SELECT 
                     pl.*, 
-                    s.name as site_name, 
-                    s.code as site_code 
+                    s.name as site_name,
+                    s.code as site_code,
+                    (SELECT r.status FROM receptions r WHERE r.packing_list_id = pl.id) as reception_status
                 FROM packing_lists pl
                 LEFT JOIN sites s ON pl.site_id = s.id";
         
@@ -285,6 +287,7 @@ class PackingList
         $pl->site_id = isset($data['site_id']) ? (int)$data['site_id'] : null;
         $pl->created_at = $data['created_at'];
         $pl->updated_at = $data['updated_at'];
+        $pl->reception_status = $data['reception_status'] ?? null;
 
         if (isset($data['site_code']) && isset($data['site_name'])) {
             $pl->site = new Site();
@@ -306,6 +309,8 @@ class PackingList
     {
         $pl = self::findById($id);
         if (!$pl || $pl->status !== 'closed') return false;
+        // Une PL en réception (ou réceptionnée) en France ne doit plus changer de contenu.
+        if (Reception::findByPackingListId($id) !== null) return false;
         $sql = "UPDATE packing_lists SET status = 'open', closed_by_user_id = NULL, updated_at = NOW() WHERE id = :id AND status = 'closed'";
         try {
             $pdo = getPDO();

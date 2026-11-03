@@ -49,12 +49,8 @@ use App\Models\Site as SiteModel; // Pour le type hinting
                                 <span class="badge bg-danger">Inactif</span>
                             <?php endif; ?>
                         </td>
-                        <?php
-                            $siteCreatedAt = new \DateTime($site->created_at);
-                            $siteUpdatedAt = new \DateTime($site->updated_at);
-                        ?>
-                        <td data-order="<?= $siteCreatedAt->format('Y-m-d H:i:s') ?>"><?= htmlspecialchars($siteCreatedAt->format('d/m/Y H:i')) ?></td>
-                        <td data-order="<?= $siteUpdatedAt->format('Y-m-d H:i:s') ?>"><?= htmlspecialchars($siteUpdatedAt->format('d/m/Y H:i')) ?></td>
+                        <td data-order="<?= htmlspecialchars($site->created_at) ?>"><?= htmlspecialchars((new \DateTime($site->created_at))->format('d/m/Y H:i')) ?></td>
+                        <td data-order="<?= htmlspecialchars($site->updated_at) ?>"><?= htmlspecialchars((new \DateTime($site->updated_at))->format('d/m/Y H:i')) ?></td>
                         <td>
                             <?php if (Auth::can('site_manage')): // Ou 'site_update' ?>
                                 <a href="<?= htmlspecialchars($baseUrl) ?>/sites/edit/<?= $site->id ?>" class="btn btn-sm btn-primary" title="Modifier le site">

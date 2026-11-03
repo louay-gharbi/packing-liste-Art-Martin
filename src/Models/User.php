@@ -283,7 +283,9 @@ class User
             $pdo = getPDO();
             $stmt = $pdo->prepare("DELETE FROM users WHERE id = :id");
             $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-            return $stmt->execute();
+            $deleted = $stmt->execute();
+            if ($deleted) self::deleteAvatar($id);
+            return $deleted;
         } catch (PDOException $e) {
             error_log("Erreur User::delete pour l'utilisateur ID {$id}: " . $e->getMessage());
             return false;
@@ -329,6 +331,70 @@ class User
         } catch (PDOException $e) {
             error_log("Erreur User::updatePasswordHash pour ID {$id}: " . $e->getMessage());
             return false;
+        }
+    }
+
+    // Photo de profil : un fichier par utilisateur (storage/avatars/<id>.<ext>), hors du dossier public.
+    public const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
+    public const AVATAR_TYPES = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+
+    public static function avatarDir(): string
+    {
+        return ROOT_PATH . '/storage/avatars';
+    }
+
+    /** Chemin du fichier photo de l'utilisateur, ou null s'il n'en a pas. */
+    public static function avatarFile(int $id): ?string
+    {
+        foreach (self::AVATAR_TYPES as $ext) {
+            $file = self::avatarDir() . "/{$id}.{$ext}";
+            if (is_file($file)) return $file;
+        }
+        return null;
+    }
+
+    /** URL de la photo (avec version pour éviter le cache après un changement), ou null. */
+    public static function avatarUrl(int $id): ?string
+    {
+        $file = self::avatarFile($id);
+        return $file ? BASE_URL . "/profile/photo/{$id}?v=" . filemtime($file) : null;
+    }
+
+    /**
+     * Enregistre la photo envoyée (entrée de $_FILES). Retourne null si OK, sinon le message d'erreur.
+     * Le type est vérifié sur le contenu du fichier, pas sur son nom.
+     */
+    public static function saveAvatar(int $id, array $upload): ?string
+    {
+        if (($upload['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) return 'Aucun fichier sélectionné.';
+        if (in_array($upload['error'], [UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE], true) || $upload['size'] > self::AVATAR_MAX_BYTES) {
+            return 'Image trop lourde (2 Mo maximum).';
+        }
+        if ($upload['error'] !== UPLOAD_ERR_OK || !is_uploaded_file($upload['tmp_name'])) return 'Échec de l\'envoi du fichier.';
+
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->file($upload['tmp_name']);
+        $size = @getimagesize($upload['tmp_name']);
+        if (!isset(self::AVATAR_TYPES[$mime]) || !$size || $size[0] < 1 || $size[0] > 5000 || $size[1] > 5000) {
+            return 'Format non accepté : JPG, PNG ou WEBP uniquement.';
+        }
+
+        $dir = self::avatarDir();
+        if (!is_dir($dir) && !@mkdir($dir, 0775, true)) {
+            error_log("User::saveAvatar - impossible de créer {$dir}");
+            return 'Erreur serveur : dossier des photos inaccessible.';
+        }
+        self::deleteAvatar($id);
+        if (!move_uploaded_file($upload['tmp_name'], "{$dir}/{$id}." . self::AVATAR_TYPES[$mime])) {
+            error_log("User::saveAvatar - échec move_uploaded_file pour l'utilisateur {$id}");
+            return 'Erreur lors de l\'enregistrement de la photo.';
+        }
+        return null;
+    }
+
+    public static function deleteAvatar(int $id): void
+    {
+        while ($file = self::avatarFile($id)) {
+            if (!@unlink($file)) break;
         }
     }
 

@@ -93,8 +93,7 @@ use App\Models\Site as SiteModel; // Pour le type hinting
                                 }
                             ?>
                         </td>
-                        <?php $shipDate = new DateTime($pl->ship_date); ?>
-                        <td data-order="<?= $shipDate->format('Y-m-d') ?>"><?= htmlspecialchars($shipDate->format('d/m/Y')) ?></td>
+                        <td data-order="<?= htmlspecialchars($pl->ship_date) ?>"><?= htmlspecialchars((new DateTime($pl->ship_date))->format('d/m/Y')) ?></td>
                         <td>
                             <?php 
                                 $statusClass = 'secondary'; $statusText = htmlspecialchars(ucfirst($pl->status));
@@ -104,8 +103,7 @@ use App\Models\Site as SiteModel; // Pour le type hinting
                             <span class="badge bg-<?= $statusClass ?>"><?= $statusText ?></span>
                         </td>
                         <td><?= $pl->getPaletteCount() ?></td>
-                        <?php $createdAt = new DateTime($pl->created_at); ?>
-                        <td data-order="<?= $createdAt->format('Y-m-d H:i:s') ?>"><?= htmlspecialchars($createdAt->format('d/m/Y H:i')) ?></td>
+                        <td data-order="<?= htmlspecialchars($pl->created_at) ?>"><?= htmlspecialchars((new DateTime($pl->created_at))->format('d/m/Y H:i')) ?></td>
                         <td>
                             <?php if (Auth::can('packinglist_read_one')): ?>
                                 <a href="<?= htmlspecialchars($baseUrl) ?>/packing-lists/show/<?= $pl->id ?>" class="btn btn-sm btn-info" title="Voir détails"><i class="fas fa-eye"></i></a>
@@ -118,7 +116,7 @@ use App\Models\Site as SiteModel; // Pour le type hinting
             <?= \App\Lib\Csrf::field() ?>
                                     <button type="submit" class="btn btn-sm btn-warning ms-1" title="Fermer la PL"><i class="fas fa-lock"></i></button>
                                 </form>
-                            <?php elseif($pl->status === 'closed' && Auth::can('packinglist_reopen')): ?>
+                            <?php elseif($pl->status === 'closed' && Auth::can('packinglist_reopen') && $pl->reception_status === null): ?>
                                 <form action="<?= htmlspecialchars($baseUrl) ?>/packing-lists/reopen/<?= $pl->id ?>" method="post" style="display:inline;" class="ms-1" onsubmit="return confirm('Êtes-vous sûr de vouloir réouvrir cette Packing List ?');">
             <?= \App\Lib\Csrf::field() ?>
                                     <button type="submit" class="btn btn-sm btn-success" title="Réouvrir la PL"><i class="fas fa-undo"></i></button>

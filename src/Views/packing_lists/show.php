@@ -65,6 +65,20 @@ if (!empty($synthesisData)) {
         </nav>
     </div>
     <div class="col-md-4 text-end">
+        <?php if (!empty($reception)): ?>
+            <?php
+                if (!$reception->isClosed())              { $recBadge = ['warning text-dark', 'En cours']; }
+                elseif ($reception->discrepancy_count > 0) { $recBadge = ['danger', 'Réceptionnée avec écarts (' . $reception->discrepancy_count . ')']; }
+                else                                       { $recBadge = ['success', 'Réceptionnée']; }
+            ?>
+            <?php if (Auth::can('reception_view')): ?>
+                <a href="<?= htmlspecialchars($baseUrl) ?>/receptions/report/<?= $reception->id ?>" class="badge bg-<?= $recBadge[0] ?> text-decoration-none p-2 me-1" title="Voir le rapport de réception">
+                    <i class="fas fa-truck-loading me-1"></i>Réception : <?=htmlspecialchars($recBadge[1]) ?>
+                </a>
+            <?php else: ?>
+                <span class="badge bg-<?= $recBadge[0] ?> p-2 me-1"><i class="fas fa-truck-loading me-1"></i>Réception : <?=htmlspecialchars($recBadge[1]) ?></span>
+            <?php endif; ?>
+        <?php endif; ?>
         <?php if (Auth::can('packinglist_read_all')): ?>
             <a href="<?= htmlspecialchars($baseUrl) ?>/packing-lists" class="btn btn-sm btn-outline-secondary" title="Retour à la liste des Packing Lists">
                 <i class="fas fa-list"></i> Liste PL
@@ -92,7 +106,7 @@ if (!empty($synthesisData)) {
                     </form>
                 <?php endif; ?>
 
-                <?php if ($packingList->status === 'closed' && Auth::can('packinglist_reopen')): ?>
+                <?php if ($packingList->status === 'closed' && Auth::can('packinglist_reopen') && empty($reception)): ?>
                     <form action="<?= htmlspecialchars($baseUrl) ?>/packing-lists/reopen/<?= $packingList->id ?>" method="post" style="display:inline-block;" class="ms-1" onsubmit="return confirm('Êtes-vous sûr de vouloir réouvrir cette Packing List ?');">
             <?= \App\Lib\Csrf::field() ?>
                         <button type="submit" class="btn btn-sm btn-success" title="Réouvrir la Packing List">
@@ -221,8 +235,7 @@ if (!empty($synthesisData)) {
                                         <td class="text-center"><?= htmlspecialchars($palette->max_colis ?? 'N/D') ?></td>
                                         <td class="text-center"><?= $palette->getColisCount() ?></td>
                                         <td class="text-center fw-bold"><?= $quantitiesByPalette[$palette->id] ?? 0 ?></td>
-                                        <?php $paletteCreatedAt = new DateTime($palette->created_at); ?>
-                                        <td data-order="<?= $paletteCreatedAt->format('Y-m-d H:i:s') ?>"><?= htmlspecialchars($paletteCreatedAt->format('d/m/Y H:i')) ?></td>
+                                        <td data-order="<?= htmlspecialchars($palette->created_at) ?>"><?= htmlspecialchars((new DateTime($palette->created_at))->format('d/m/Y H:i')) ?></td>
                                         <td class="text-end">
                                             <a href="<?= htmlspecialchars($baseUrl) ?>/palettes/show/<?= $palette->id ?>" class="btn btn-xs btn-outline-primary py-0 px-1" title="Voir détail"><i class="fas fa-eye fa-xs"></i></a>
                                         </td>

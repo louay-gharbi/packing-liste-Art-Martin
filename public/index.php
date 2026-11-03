@@ -45,6 +45,12 @@ use App\Controllers\ColisController;
 use App\Controllers\TheoreticalExportController;
 use App\Controllers\SearchController;
 use App\Controllers\SiteController;
+use App\Controllers\ReceptionController;
+use App\Controllers\ClientPaletteController;
+use App\Controllers\OrderBlcController;
+use App\Controllers\ProfileController;
+use App\Controllers\MaintenanceController;
+use App\Lib\Maintenance;
 
 // error_log("DEBUG 6: Use statements processed");
 
@@ -65,6 +71,14 @@ $router->get('/', [DashboardController::class, 'index']);
 $router->get('/login', [AuthController::class, 'showLoginForm']); // Afficher le formulaire
 $router->post('/login', [AuthController::class, 'login']);        // Traiter la soumission du formulaire
 $router->get('/logout', [AuthController::class, 'logout']);        // Déconnexion
+
+// --- MON PROFIL (tout utilisateur connecté) ---
+$router->get('/profile', [ProfileController::class, 'index']);
+$router->post('/profile/update', [ProfileController::class, 'update']);
+$router->post('/profile/password', [ProfileController::class, 'updatePassword']);
+$router->post('/profile/photo', [ProfileController::class, 'uploadPhoto']);
+$router->post('/profile/photo/delete', [ProfileController::class, 'deletePhoto']);
+$router->get('/profile/photo/{id}', [ProfileController::class, 'photo']);
 
 // --- ROUTES POUR LA GESTION DES USERS ---
 $router->get('/users', [UserController::class, 'index']);          // Lister les utilisateurs
@@ -112,7 +126,10 @@ $router->get('/packing-lists/{id}/export-synthesis/xlsx', [PackingListController
 // --- ROUTES POUR LES PALETTES ---
 // Création d'une palette pour une PL spécifique (POST car action de création)
 $router->post('/packing-lists/{packingListId}/palettes/store', [PaletteController::class, 'storeForPackingList']);
+$router->get('/palettes/show/{id}/export/pdf', [PaletteController::class, 'exportPdf']); // PDF détail palette (Dompdf)
 $router->get('/palettes/show/{id}', [PaletteController::class, 'show']);
+$router->get('/palettes/qr/{id}', [PaletteController::class, 'qrCode']); // QR généré à la volée (SVG)
+$router->get('/palettes/qr/{id}/print', [PaletteController::class, 'qrCodePrint']);
 $router->post('/palettes/open/{id}', [PaletteController::class, 'processOpening']); // Saisie de max_colis après premier "scan"
 $router->post('/palettes/update-max-colis/{id}', [PaletteController::class, 'updateMaxColis']);
 $router->post('/palettes/close/{id}', [PaletteController::class, 'closePalette']);
@@ -162,6 +179,49 @@ $router->post('/sites/update/{id}', [SiteController::class, 'update']);
 $router->post('/sites/deactivate/{id}', [SiteController::class, 'deactivateSite']);
 $router->post('/sites/reactivate/{id}', [SiteController::class, 'reactivateSite']);
 $router->post('/sites/force-delete/{id}', [SiteController::class, 'forceDeleteSite']);
+
+// --- ROUTES POUR LA RÉCEPTION FRANCE ---
+$router->get('/receptions', [ReceptionController::class, 'index']);
+$router->post('/receptions/start/{plId}', [ReceptionController::class, 'start']);
+$router->get('/receptions/scan/{id}', [ReceptionController::class, 'scan']);
+$router->post('/receptions/{id}/scan-ajax', [ReceptionController::class, 'processScanAjax']);
+$router->post('/receptions/close/{id}', [ReceptionController::class, 'close']);
+$router->get('/receptions/report/{id}', [ReceptionController::class, 'report']);
+// Colisage client : déclaré avant '/receptions/{id}/export/xlsx' ({id} accepterait "client-packing").
+$router->get('/receptions/client-packing', [ReceptionController::class, 'clientPacking']);
+$router->get('/receptions/client-packing/export/xlsx', [ReceptionController::class, 'exportClientPackingXlsx']);
+$router->get('/receptions/client-packing/export/pdf', [ReceptionController::class, 'exportClientPackingPdf']);
+$router->get('/receptions/{id}/export/xlsx', [ReceptionController::class, 'exportReportXlsx']);
+
+// BLC AMF par commande
+$router->get('/commandes-blc', [OrderBlcController::class, 'index']);
+$router->post('/commandes-blc/save', [OrderBlcController::class, 'saveAjax']);
+
+// Palettes client (expédition France -> client)
+$router->get('/client-palettes', [ClientPaletteController::class, 'index']);
+$router->post('/client-palettes/create', [ClientPaletteController::class, 'create']);
+$router->get('/client-palettes/{id}', [ClientPaletteController::class, 'show']);
+$router->post('/client-palettes/{id}/scan-ajax', [ClientPaletteController::class, 'scanAjax']);
+$router->post('/client-palettes/{id}/remove/{lineId}', [ClientPaletteController::class, 'removeLine']);
+$router->post('/client-palettes/{id}/close', [ClientPaletteController::class, 'close']);
+$router->post('/client-palettes/{id}/reopen', [ClientPaletteController::class, 'reopen']);
+$router->post('/client-palettes/{id}/delete', [ClientPaletteController::class, 'delete']);
+$router->get('/client-palettes/{id}/export/xlsx', [ClientPaletteController::class, 'exportXlsx']);
+$router->get('/client-palettes/{id}/export/pdf', [ClientPaletteController::class, 'exportPdf']);
+$router->get('/client-palettes/{id}/label', [ClientPaletteController::class, 'label']);
+
+// --- MODE MAINTENANCE (rôle Administrateur) ---
+$router->get('/maintenance', [MaintenanceController::class, 'index']);
+$router->get('/maintenance/preview', [MaintenanceController::class, 'preview']);
+$router->post('/maintenance/enable', [MaintenanceController::class, 'enable']);
+$router->post('/maintenance/disable', [MaintenanceController::class, 'disable']);
+
+// Maintenance active : seuls les administrateurs passent (pages, AJAX, exports, POST).
+// Placé avant le contrôle CSRF et le dispatch : aucune action n'est exécutée pour les autres.
+if ($blocked = Maintenance::blockingResponse($request, $router->relativePath($request))) {
+    $blocked->send();
+    exit;
+}
 
 
 // 6. Vérification CSRF centrale pour toute requête POST.

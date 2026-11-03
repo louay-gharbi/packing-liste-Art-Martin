@@ -1,6 +1,7 @@
 <?php
 // src/Views/packing_lists/export_colis_table.php
-// Variables disponibles : $packingList, $colisList, $appName, $currentDate, $logoBase64
+// Variables disponibles : $packingList, $colisList, $childrenByParent, $summaryData, $blcMap (N° commande => BLC AMF),
+//                         $appName, $currentDate, $logoBase64
 // $baseUrl n'est pas utilisé ici car tous les styles sont inline ou dans <style>
 ?>
 <!DOCTYPE html>
@@ -28,18 +29,23 @@
             font-size: 10pt;
             margin: 2px 0;
         }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            margin-top: 10px; 
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
         }
-        th, td { 
-            border: 1px solid #666; 
-            padding: 5px; 
-            text-align: left; 
-            word-wrap: break-word; /* ou overflow-wrap: break-word; */
-            font-size: 8pt; /* Réduire un peu pour plus de contenu */
+        /* Largeurs fixes : les 16 colonnes tiennent dans la largeur A4 paysage. */
+        table.colis-table { table-layout: fixed; }
+        th, td {
+            border: 1px solid #666;
+            padding: 2px 3px;
+            text-align: left;
+            vertical-align: top;
+            word-wrap: break-word;
+            font-size: 6.5pt;
         }
+        table.recap { width: 40%; }
+        table.recap td { font-size: 8pt; padding: 3px 5px; }
         th { 
             background-color: #e0e0e0; 
             font-weight: bold; 
@@ -53,7 +59,7 @@
                on peut le mettre à la fin du contenu principal pour l'instant. */
         }
         @page {
-            margin: 20mm 15mm 20mm 15mm; /* Haut, Droite, Bas, Gauche */
+            margin: 12mm 10mm 12mm 10mm; /* Haut, Droite, Bas, Gauche */
         }
         /* Pour le pied de page avec Dompdf (si activé) */
         /* 
@@ -76,25 +82,25 @@
         <p><strong>Date d'export :</strong> <?= htmlspecialchars($currentDate) ?></p>
     </div>
 
-    <table>
+    <table class="colis-table">
         <thead>
             <tr>
-                <th>Palette</th>
-                <th>Colis</th>
-                <th>Numéro lot</th>
-                <th>Quantité</th>
-                <th>Unité</th>
-                <th>N°CDE AMTD</th>
-                <th>N°Ligne</th>
-                <th>Réf. interne</th>
-                <th>BLC AMF</th>
-                <th>Client</th>
-                <th>Code postal livraison</th>
-                <th>Code article</th>
-                <th>Libellé</th>
-                <th>Référencement client</th>
-                <th>Poids brut (Kg)</th>
-                <th>Commentaire</th>
+                <th style="width: 8%;">Palette</th>
+                <th style="width: 6%;">Colis</th>
+                <th style="width: 5.5%;">N° lot</th>
+                <th style="width: 4.5%;">Qté</th>
+                <th style="width: 3.5%;">Unité</th>
+                <th style="width: 4.5%;">N° CDE AMTD</th>
+                <th style="width: 3.5%;">N° ligne</th>
+                <th style="width: 9%;">Réf. interne</th>
+                <th style="width: 5%;">BLC AMF</th>
+                <th style="width: 6%;">Client</th>
+                <th style="width: 4.5%;">CP livr.</th>
+                <th style="width: 9%;">Code article</th>
+                <th style="width: 11.5%;">Libellé</th>
+                <th style="width: 8%;">Réf. client</th>
+                <th style="width: 3.5%;">Poids brut (kg)</th>
+                <th style="width: 8%;">Commentaire</th>
             </tr>
         </thead>
         <tbody>
@@ -133,7 +139,7 @@
                             <td><?= htmlspecialchars($colis->order_number ?? '') ?></td>
                             <td><?= htmlspecialchars($colis->line_number ?? '') ?></td>
                             <td><?= htmlspecialchars($colis->internal_reference ?? '') ?></td>
-                            <td></td>
+                            <td><?= htmlspecialchars($blcMap[(string)$colis->order_number] ?? '') ?></td>
                             <td><?= htmlspecialchars($colis->client_name ?? '') ?></td>
                             <td><?= htmlspecialchars($colis->postal_code ?? '') ?></td>
                             <td><?= htmlspecialchars($colis->article_reference ?? '') ?></td>
@@ -146,13 +152,13 @@
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="10" style="text-align:center; padding: 10px;">Aucun colis trouvé pour cette Packing List.</td>
+                    <td colspan="16" style="text-align:center; padding: 10px;">Aucun colis trouvé pour cette Packing List.</td>
                 </tr>
             <?php endif; ?>
         </tbody>
     </table>
 
-    <table>
+    <table class="recap">
         <thead>
             <tr>
                 <th colspan="2">Récapitulatif</th>

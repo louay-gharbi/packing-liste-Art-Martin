@@ -87,12 +87,15 @@ Famille `/sites/*`
 - [x] `theoretical_exports/import.php` (multipart)
 - [x] `partials/_move_colis_modal.php`
 - [x] `partials/_move_colis_massive_modal.php`
+- [x] `receptions/index.php` — `/receptions/start/{plId}` (ajout 2026-10-30)
+- [x] `receptions/scan.php` — `/receptions/close/{id}` (modale de clôture, ajout 2026-10-30)
 
 ## C — Appels AJAX POST (`public/js/`, vues inline)
 
 - [x] `public/js/search.js:57` → `/search/ajax`, `/search/by-of`, `/search/by-sku` (`application/json`)
 - [x] `src/Views/colis/scan.php:544` → `/colis/process-palette-scan-ajax` (`application/x-www-form-urlencoded`)
 - [x] `src/Views/colis/scan.php:641` → `/colis/process-scan-ajax` (`application/x-www-form-urlencoded`)
+- [x] `src/Views/receptions/scan.php` → `/receptions/{id}/scan-ajax`, `/receptions/{id}/condition-ajax` (`application/x-www-form-urlencoded`, vérifié : 403 sans jeton)
 
 Tous transportent l'en-tête `X-CSRF-Token` via `window.csrfToken()`.
 

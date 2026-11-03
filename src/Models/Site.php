@@ -12,6 +12,7 @@ class Site
     public string $code;
     public string $name;
     public ?string $address;
+    public string $type = 'production'; // 'production' (Tunisie) ou 'reception' (France)
     public bool $is_active;
     public string $created_at;
     public string $updated_at;
@@ -28,8 +29,8 @@ class Site
             return false;
         }
 
-        $sql = "INSERT INTO sites (code, name, address, is_active, created_at, updated_at) 
-                VALUES (:code, :name, :address, :is_active, NOW(), NOW())";
+        $sql = "INSERT INTO sites (code, name, address, type, is_active, created_at, updated_at)
+                VALUES (:code, :name, :address, :type, :is_active, NOW(), NOW())";
         try {
             $pdo = getPDO();
             $stmt = $pdo->prepare($sql);
@@ -37,6 +38,7 @@ class Site
             $stmt->bindValue(':name', trim($data['name']));
             $stmt->bindValue(':address', isset($data['address']) ? trim($data['address']) : null, 
                             (isset($data['address']) && $data['address'] !== null) ? PDO::PARAM_STR : PDO::PARAM_NULL);
+            $stmt->bindValue(':type', self::normalizeType($data['type'] ?? null));
             $stmt->bindValue(':is_active', $data['is_active'] ?? true, PDO::PARAM_BOOL);
 
             if ($stmt->execute()) {
@@ -79,6 +81,7 @@ class Site
             $fields[] = "address = :address"; 
             $params[':address'] = ($data['address'] !== null && $data['address'] !== '') ? trim($data['address']) : null;
         }
+        if (isset($data['type'])) { $fields[] = "type = :type"; $params[':type'] = self::normalizeType($data['type']); }
         if (isset($data['is_active'])) { $fields[] = "is_active = :is_active"; $params[':is_active'] = (bool)$data['is_active']; }
 
         if (empty($fields)) {
@@ -168,12 +171,20 @@ class Site
     public static function getAllActive(): array {
         $sites = []; try { $pdo = getPDO(); $stmt = $pdo->query("SELECT * FROM sites WHERE is_active = TRUE ORDER BY name ASC"); $sitesData = $stmt->fetchAll(PDO::FETCH_ASSOC); foreach ($sitesData as $data) { $sites[] = self::hydrate($data); } } catch (PDOException $e) { error_log("Erreur Site::getAllActive: " . $e->getMessage()); } return $sites;
     }
+    /**
+     * Sites actifs de production (Tunisie) : seuls sites autorisés pour créer une Packing List.
+     */
+    public static function getAllActiveProduction(): array {
+        $sites = []; try { $pdo = getPDO(); $stmt = $pdo->query("SELECT * FROM sites WHERE is_active = TRUE AND type = 'production' ORDER BY name ASC"); foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $data) { $sites[] = self::hydrate($data); } } catch (PDOException $e) { error_log("Erreur Site::getAllActiveProduction: " . $e->getMessage()); } return $sites;
+    }
+    public function isReceptionSite(): bool { return $this->type === 'reception'; }
+    public static function normalizeType(?string $type): string { return $type === 'reception' ? 'reception' : 'production'; }
     public static function getAll(): array {
         $sites = []; try { $pdo = getPDO(); $stmt = $pdo->query("SELECT * FROM sites ORDER BY name ASC"); $sitesData = $stmt->fetchAll(PDO::FETCH_ASSOC); foreach ($sitesData as $data) { $sites[] = self::hydrate($data); } } catch (PDOException $e) { error_log("Erreur Site::getAll: " . $e->getMessage()); } return $sites;
     }
     private static function hydrate(array $data): Site {
         $site = new self(); $site->id = (int)$data['id']; $site->code = $data['code']; $site->name = $data['name'];
-        $site->address = $data['address'] ?? null; $site->is_active = (bool)$data['is_active'];
+        $site->address = $data['address'] ?? null; $site->type = self::normalizeType($data['type'] ?? null); $site->is_active = (bool)$data['is_active'];
         $site->created_at = $data['created_at']; $site->updated_at = $data['updated_at']; return $site;
     }
 }

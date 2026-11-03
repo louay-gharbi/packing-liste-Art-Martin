@@ -294,6 +294,7 @@ window.initializeDataTable = function(selector, orderConfig = [], columnDefsConf
                     
                     // Appliquer un style après initialisation
                     $(selector + '_wrapper .dt-buttons').addClass('mb-0');
+
                     // Sortir la barre de boutons du .table-responsive (overflow) :
                     // sinon les menus déroulants Colonnes / Options sont coupés.
                     const responsiveBox = $(selector).closest('.table-responsive');
@@ -524,8 +525,9 @@ $(document).ready(function() {
     initializeDataTable('#sitesTable', [[2, "asc"]], [{ "orderable": false, "targets": [7] }]);
     initializeDataTable('#palettesTableOnPLShowPage', [[5, "desc"]], [{ "orderable": false, "targets": [0, 6] }]);
     initializeDataTable('#allPalettesTable', [[9, "desc"]], [{ "orderable": false, "targets": [0, 10] }]);
-    initializeDataTable('#colisTableOnPaletteDetail', [], [{ "orderable": false, "targets": [8] }], -1, { ordering: false, paging: false });
+    // #colisTableOnPaletteDetail : initialisé par palettes/show.php (boutons dont le PDF serveur).
     initializeDataTable('#deviationsFollowUpTable', [], [], 50, { "searching": true });
+    initializeDataTable('#receptionsTable', [], [{ "orderable": false, "targets": [6] }]); // ordre serveur : en cours d'abord
 
     // ===== BOUTON RAFRAÎCHIR SUR LES DATATABLES =====
     // Ajoute un bouton "Rafraîchir" à chaque DataTable après initialisation

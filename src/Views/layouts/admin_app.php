@@ -24,7 +24,7 @@ $pageTitle = $pageTitle ?? 'Application';
     
     <!-- Styles globaux -->
     <link rel="stylesheet" href="<?= htmlspecialchars($baseUrl) ?>/css/style.css">
-    <link rel="stylesheet" href="<?= htmlspecialchars($baseUrl) ?>/css/admin_layout.css">
+    <link rel="stylesheet" href="<?= htmlspecialchars($baseUrl) ?>/css/admin_layout.css?v=<?= @filemtime(PUBLIC_PATH . '/css/admin_layout.css') ?: 1 ?>">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -243,6 +243,15 @@ $pageTitle = $pageTitle ?? 'Application';
             margin: 0;
             font-size: 1.3rem;
         }
+        .admin-main-header .global-search-wrapper { margin-left: auto; flex: 0 1 400px; min-width: 160px; }
+        .header-profile { flex-shrink: 0; }
+        .admin-main-header { flex-wrap: nowrap; }
+        .admin-main-header h1 { flex-shrink: 0; white-space: nowrap; }
+        .header-profile > a { padding: 4px 8px; border-radius: 999px; }
+        .header-profile > a:hover { background: #f1f3f5; }
+        .header-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+                         display: inline-flex; align-items: center; justify-content: center;
+                         background: #0d6efd; color: #fff; font-size: .85rem; font-weight: 600; border: 1px solid #dee2e6; }
         
         /* ===== FIX SCROLL HORIZONTAL PAGES ===== */
         .admin-page-content {
@@ -305,8 +314,40 @@ $pageTitle = $pageTitle ?? 'Application';
                         <div id="globalSearchContent"></div>
                     </div>
                 </div>
+
+                <!-- Profil utilisateur (en haut à droite) -->
+                <?php
+                    $headerUser = \App\Lib\Auth::user();
+                    $headerAvatar = \App\Models\User::avatarUrl($headerUser->id);
+                    $headerName = trim(($headerUser->first_name ?? '') . ' ' . ($headerUser->last_name ?? '')) ?: $headerUser->username;
+                    $headerInitials = mb_strtoupper(mb_substr($headerUser->first_name ?: $headerUser->username, 0, 1) . mb_substr($headerUser->last_name ?? '', 0, 1));
+                ?>
+                <div class="dropdown header-profile">
+                    <a href="#" class="d-flex align-items-center gap-2 text-decoration-none text-dark dropdown-toggle" id="headerProfileMenu" data-bs-toggle="dropdown" aria-expanded="false" title="Mon profil">
+                        <?php if ($headerAvatar): ?>
+                            <img src="<?= htmlspecialchars($headerAvatar) ?>" alt="" class="header-avatar">
+                        <?php else: ?>
+                            <span class="header-avatar"><?= htmlspecialchars($headerInitials) ?></span>
+                        <?php endif; ?>
+                        <span class="d-none d-md-inline small fw-semibold"><?= htmlspecialchars($headerName) ?></span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="headerProfileMenu">
+                        <li class="px-3 py-2 small text-muted border-bottom mb-1">Connecté : <strong><?= htmlspecialchars($headerUser->username) ?></strong></li>
+                        <li><a class="dropdown-item" href="<?= htmlspecialchars($baseUrl) ?>/profile"><i class="fas fa-user-circle me-2"></i>Mon profil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="<?= htmlspecialchars($baseUrl) ?>/logout"><i class="fas fa-sign-out-alt me-2"></i>Déconnexion</a></li>
+                    </ul>
+                </div>
                 <?php endif; ?>
             </header>
+            <?php if (($maintenanceStatus = \App\Lib\Maintenance::status()) !== null): ?>
+                <div class="alert alert-warning rounded-0 border-0 border-bottom mb-0 py-2 px-4 d-flex align-items-center gap-2 small">
+                    <i class="fas fa-tools"></i>
+                    <span><strong>Mode maintenance actif</strong> : les utilisateurs non administrateurs sont bloqués
+                        <?= !empty($maintenanceStatus['until']) ? ' (retour prévu le ' . htmlspecialchars((new DateTime($maintenanceStatus['until']))->format('d/m/Y à H:i')) . ')' : '' ?>.</span>
+                    <a href="<?= htmlspecialchars($baseUrl) ?>/maintenance" class="ms-auto alert-link">Gérer</a>
+                </div>
+            <?php endif; ?>
             <div class="admin-page-content">
                 <!-- Messages Flash (gérés par le layout) -->
                 <?php
@@ -356,7 +397,7 @@ $pageTitle = $pageTitle ?? 'Application';
     
     <script>const baseUrl = "<?= htmlspecialchars($baseUrl) ?>";</script>
     <!-- 6. Votre script JS personnalisé -->
-    <script src="<?= htmlspecialchars($baseUrl) ?>/js/app.js"></script>
+    <script src="<?= htmlspecialchars($baseUrl) ?>/js/app.js?v=<?= @filemtime(PUBLIC_PATH . '/js/app.js') ?: 1 ?>"></script>
 
     <?php if (isset($pageScripts) && is_array($pageScripts)): ?>
         <?php foreach ($pageScripts as $script): ?>

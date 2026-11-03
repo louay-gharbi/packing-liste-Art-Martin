@@ -55,6 +55,7 @@ class SiteController extends BaseController
         $code = trim(strtoupper($request->post('code', '')));
         $name = trim($request->post('name', ''));
         $address = trim($request->post('address', ''));
+        $type = Site::normalizeType($request->post('type'));
         $is_active = $request->post('is_active') === 'on';
 
         $errors = [];
@@ -77,7 +78,7 @@ class SiteController extends BaseController
             return $this->view('sites/create.php', [
                 'pageTitle' => 'Créer un Nouveau Site',
                 'errors' => $errors,
-                'site_data' => ['code' => $code, 'name' => $name, 'address' => $address, 'is_active' => $is_active],
+                'site_data' => ['code' => $code, 'name' => $name, 'address' => $address, 'type' => $type, 'is_active' => $is_active],
                 'request' => $request
             ]);
         }
@@ -86,6 +87,7 @@ class SiteController extends BaseController
             'code' => $code, 
             'name' => $name, 
             'address' => $address ?: null, // S'assurer que c'est null si vide
+            'type' => $type,
             'is_active' => $is_active
         ]);
 
@@ -96,7 +98,7 @@ class SiteController extends BaseController
             $this->flash(FLASH_ERROR, 'Erreur lors de la création du site. Le code du site est peut-être déjà utilisé.');
             return $this->view('sites/create.php', [
                 'pageTitle' => 'Créer un Nouveau Site',
-                'site_data' => ['code' => $code, 'name' => $name, 'address' => $address, 'is_active' => $is_active],
+                'site_data' => ['code' => $code, 'name' => $name, 'address' => $address, 'type' => $type, 'is_active' => $is_active],
                 'request' => $request,
                 'db_error' => 'Une erreur interne est survenue ou le code du site est dupliqué.'
             ]);
@@ -136,6 +138,7 @@ class SiteController extends BaseController
         $code = trim(strtoupper($request->post('code', $siteToUpdate->code)));
         $name = trim($request->post('name', $siteToUpdate->name));
         $address = trim($request->post('address', $siteToUpdate->address ?? ''));
+        $type = Site::normalizeType($request->post('type', $siteToUpdate->type));
         $is_active = $request->post('is_active') === 'on';
 
         $errors = [];
@@ -164,6 +167,7 @@ class SiteController extends BaseController
             'code' => $code, 
             'name' => $name, 
             'address' => $address ?: null, // S'assurer que c'est null si vide
+            'type' => $type,
             'is_active' => $is_active
         ]);
 

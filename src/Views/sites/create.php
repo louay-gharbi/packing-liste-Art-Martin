@@ -42,6 +42,15 @@ use App\Lib\Auth;
                 <label for="site_address" class="form-label">Adresse :</label>
                 <textarea class="form-control" id="site_address" name="address" rows="3"><?= htmlspecialchars($site_data['address'] ?? $request->post('address', '')) ?></textarea>
             </div>
+
+            <div class="mb-3">
+                <?php $siteType = $site_data['type'] ?? $request->post('type', 'production'); ?>
+                <label for="site_type" class="form-label">Type :</label>
+                <select class="form-select" id="site_type" name="type">
+                    <option value="production" <?= $siteType !== 'reception' ? 'selected' : '' ?>>Production (crée des Packing Lists)</option>
+                    <option value="reception" <?= $siteType === 'reception' ? 'selected' : '' ?>>Réception</option>
+                </select>
+            </div>
             
             <div class="form-check mb-3">
                 <?php

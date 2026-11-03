@@ -49,6 +49,15 @@ if (!isset($site) || !$site instanceof SiteModel) {
                 <label for="site_address_edit" class="form-label">Adresse :</label>
                 <textarea class="form-control" id="site_address_edit" name="address" rows="3"><?= htmlspecialchars($request->post('address', $site->address ?? '')) ?></textarea>
             </div>
+
+            <div class="mb-3">
+                <?php $siteType = $request->post('type', $site->type); ?>
+                <label for="site_type_edit" class="form-label">Type :</label>
+                <select class="form-select" id="site_type_edit" name="type">
+                    <option value="production" <?= $siteType !== 'reception' ? 'selected' : '' ?>>Production (crée des Packing Lists)</option>
+                    <option value="reception" <?= $siteType === 'reception' ? 'selected' : '' ?>>Réception</option>
+                </select>
+            </div>
             
             <div class="form-check mb-3">
                 <?php

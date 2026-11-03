@@ -4,7 +4,6 @@
 namespace App\Models;
 
 use App\Services\ReferenceGenerator;
-use App\Services\QrCodeService;
 use PDO;
 use PDOException;
 use DateTime;
@@ -85,13 +84,11 @@ class Palette
             }
 
             // Reessai sur violation d'unicite (SQLSTATE 23000) jusqu'a 3 tentatives.
-            // QR genere a la premiere tentative reussie pour eviter les fichiers orphelins.
             $sqlUpdate = "UPDATE palettes SET code = :code, qr_code_path = :qr_code_path, updated_at = NOW() WHERE id = :id";
             $stmtUpdate = $pdo->prepare($sqlUpdate);
             $maxRetries = 3;
             $attempt = 0;
             $finalCode = '';
-            $dbQrCodePath = null;
             while (true) {
                 $attempt++;
                 $finalCode = ReferenceGenerator::generate('palette_code_pattern', $lastId, $siteIdForGenerator, $siteCodePlaceholder, new DateTime());
@@ -116,18 +113,7 @@ class Palette
                 }
             }
 
-            // Code unique acquis : generer le QR et mettre a jour le chemin.
-            $qrCodeService = new QrCodeService();
-            $qrCodeFilenameBase = 'palette_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $finalCode) . '_' . $lastId;
-            $generatedQrPath = $qrCodeService->generateAndSavePaletteQrCode($finalCode, $qrCodeFilenameBase, $finalCode);
-            $dbQrCodePath = ($generatedQrPath !== false && is_string($generatedQrPath)) ? $generatedQrPath : null;
-            if ($dbQrCodePath !== null) {
-                $stmtQr = $pdo->prepare("UPDATE palettes SET qr_code_path = :qr WHERE id = :id");
-                $stmtQr->bindValue(':qr', $dbQrCodePath, PDO::PARAM_STR);
-                $stmtQr->bindValue(':id', $lastId, PDO::PARAM_INT);
-                $stmtQr->execute();
-            }
-
+            // Le QR code n'est plus stocké : il est généré à la volée (PaletteController::qrCode).
             $pdo->commit();
             return self::findById($lastId);
 

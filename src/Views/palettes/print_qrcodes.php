@@ -56,16 +56,10 @@ if ($qrSizePx > $labelHeightPx - ($printWithLabelText ? 25 : 10)) $qrSizePx = $l
 <div class="qr-grid-container">
     <?php foreach ($palettesToPrint as $palette): ?>
         <div class="qr-label-item">
-            <?php if ($palette->qr_code_path): ?>
-                <?php $fullQrUrlPrint = preg_match('#^https?://#', $palette->qr_code_path)
-                    ? $palette->qr_code_path
-                    : rtrim($baseUrl, '/') . $palette->qr_code_path; ?>
-                <img src="<?= htmlspecialchars($fullQrUrlPrint) ?>" alt="QR Code <?= htmlspecialchars($palette->code) ?>">
-                <?php if ($printWithLabelText): ?>
-                    <div class="code-text"><?= htmlspecialchars($palette->code) ?></div>
-                <?php endif; ?>
-            <?php else: ?>
-                <div class="code-text">QR non dispo.<br><?= htmlspecialchars($palette->code) ?></div>
+            <img src="<?= htmlspecialchars(rtrim($baseUrl, '/')) ?>/palettes/qr/<?= (int)$palette->id ?>?label=0" alt="QR Code <?= htmlspecialchars($palette->code) ?>"
+                 style="width: <?= $qrSizePx ?>px; height: <?= $qrSizePx ?>px;">
+            <?php if ($printWithLabelText): ?>
+                <div class="code-text"><?= htmlspecialchars($palette->code) ?></div>
             <?php endif; ?>
         </div>
     <?php endforeach; ?>

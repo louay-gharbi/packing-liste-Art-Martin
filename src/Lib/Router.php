@@ -97,21 +97,18 @@ class Router
     }
 
     /**
-     * Traite la requête actuelle et appelle le handler de la route correspondante.
-     *
-     * @param Request $request L'objet Request contenant les informations de la requête.
-     * @return mixed Le résultat de l'exécution du handler.
-     * @throws \Exception Si aucune route ne correspond ou si le handler est invalide.
+     * Chemin de la requête relatif à la racine de l'application (ex. "/packing-lists"), toujours préfixé par "/".
      */
-    public function dispatch(Request $request): mixed
+    public function relativePath(Request $request): string
     {
-        $requestMethod = $request->getMethod();
         $requestPath = $request->getPath(); // Utilise le chemin déjà nettoyé par Request
 
         // Ajuster requestPath si l'application est dans un sous-dossier
         // Le Request->getPath() retourne le chemin de l'URI complète.
         // Nous devons le comparer au chemin relatif à la racine de l'application.
-        if (!empty($this->basePath) && strpos($requestPath, $this->basePath) === 0) {
+        // Comparaison insensible à la casse : sous Windows/Apache, "/Packinglist/..." sert le même dossier
+        // que "/packinglist/..." mais le basePath (issu de SCRIPT_NAME) garde la casse réelle du dossier.
+        if (!empty($this->basePath) && stripos($requestPath, $this->basePath) === 0) {
             $routePathToMatch = substr($requestPath, strlen($this->basePath));
             if (empty($routePathToMatch)) { // Si après suppression du basePath on a une chaine vide, c'est la racine
                 $routePathToMatch = '/';
@@ -123,6 +120,20 @@ class Router
         if (!str_starts_with($routePathToMatch, '/')) {
             $routePathToMatch = '/' . $routePathToMatch;
         }
+        return $routePathToMatch;
+    }
+
+    /**
+     * Traite la requête actuelle et appelle le handler de la route correspondante.
+     *
+     * @param Request $request L'objet Request contenant les informations de la requête.
+     * @return mixed Le résultat de l'exécution du handler.
+     * @throws \Exception Si aucune route ne correspond ou si le handler est invalide.
+     */
+    public function dispatch(Request $request): mixed
+    {
+        $requestMethod = $request->getMethod();
+        $routePathToMatch = $this->relativePath($request);
 
 
         foreach ($this->routes as $route) {

@@ -13,12 +13,7 @@ if (!isset($palette) || !$palette instanceof PaletteModel) {
     return;
 }
 
-$fullQrUrl = '';
-if (!empty($palette->qr_code_path)) {
-    $fullQrUrl = preg_match('#^https?://#', $palette->qr_code_path)
-        ? $palette->qr_code_path
-        : rtrim($baseUrl, '/') . $palette->qr_code_path;
-}
+$fullQrUrl = htmlspecialchars($baseUrl) . '/palettes/qr/' . (int)$palette->id; // QR généré à la volée
 ?>
 
 <div class="row mb-3">
@@ -126,15 +121,14 @@ if (!empty($palette->qr_code_path)) {
                  <p class="mb-0"><strong>Créée le :</strong> <?= htmlspecialchars((new DateTime($palette->created_at))->format('d/m/Y H:i')) ?></p>
             </div>
             <div class="col-md-4 text-center">
-                <?php if (!empty($palette->qr_code_path)): ?>
                 <div class="mb-2">
-                        <strong>QR Code Palette :</strong><br>
-                        <img src="<?= $fullQrUrl ?>" alt="QR Code Palette <?= htmlspecialchars($palette->code) ?>" style="max-width: 150px; height: auto; border: 1px solid #ccc; margin-top: 5px;">
-                        <p class="mt-1 mb-0"><small><a href="<?= $fullQrUrl ?>" download="qr_palette_<?= preg_replace('/[^a-zA-Z0-9_-]/', '_', $palette->code) ?>.png">Télécharger</a></small></p>
-                    </div>
-                <?php elseif ($palette->status === 'generated'): ?>
-                    <p class="text-warning mt-3 small">QR Code non généré ou non disponible.</p>
-                <?php endif; ?>
+                    <strong>QR Code Palette :</strong><br>
+                    <img src="<?= $fullQrUrl ?>" alt="QR Code Palette <?= htmlspecialchars($palette->code) ?>" style="width: 150px; height: 150px; border: 1px solid #ccc; margin-top: 5px;">
+                    <p class="mt-1 mb-0"><small>
+                        <a href="<?= $fullQrUrl ?>/print" target="_blank"><i class="fas fa-print"></i> Imprimer</a>
+                        · <a href="<?= $fullQrUrl ?>?download=1">Télécharger</a>
+                    </small></p>
+                </div>
                 <p class="mb-0"><small><strong>Ouverte le :</strong> <?= $palette->open_date_time ? htmlspecialchars((new DateTime($palette->open_date_time))->format('d/m/Y H:i')) : '<span class="text-muted">N/A</span>' ?></small></p>
                 <p class="mb-0"><small><strong>Fermée le :</strong> <?= $palette->close_date_time ? htmlspecialchars((new DateTime($palette->close_date_time))->format('d/m/Y H:i')) : '<span class="text-muted">N/A</span>' ?></small></p>
             </div>
@@ -282,7 +276,7 @@ if (!empty($palette->qr_code_path)) {
                     <thead>
                         <tr>
                             <?php if ($palette->status === 'open' && Auth::can('colis_move')): ?>
-                                <th data-orderable="false" style="width: 30px;">
+                                <th data-orderable="false" class="no-export" style="width: 30px;">
                                     <input type="checkbox" id="selectAllColisHeader" title="Sélectionner tout">
                                 </th>
                             <?php endif; ?>
@@ -296,7 +290,7 @@ if (!empty($palette->qr_code_path)) {
                             <th>Scanné le</th>
                             <th>Commentaire</th>
                             <?php if ($palette->status === 'open' && (Auth::can('colis_delete') || Auth::can('colis_move'))): ?>
-                                <th data-orderable="false" style="min-width: 80px;">Actions</th>
+                                <th data-orderable="false" class="no-export" style="min-width: 80px;">Actions</th>
                             <?php endif; ?>
                         </tr>
                     </thead>
@@ -318,15 +312,19 @@ if (!empty($palette->qr_code_path)) {
                                         <?php endif; ?>
                                     </td>
                                 <?php endif; ?>
-                                <td><strong><?= htmlspecialchars($parentColis ? $parentColis->package_number : $colis->package_number) ?></strong></td>
-                                <td><?= $parentColis && $colis !== $parentColis ? htmlspecialchars($colis->package_number) : '' ?></td>
+                                <?php
+                                    // Clé de tri commune aux 2 premières colonnes : le groupage puis ses fils restent ensemble.
+                                    $groupKey = ($parentColis ? $parentColis->package_number : $colis->package_number)
+                                              . (($parentColis && $colis !== $parentColis) ? ' 1 ' . $colis->package_number : ' 0');
+                                ?>
+                                <td data-order="<?= htmlspecialchars($groupKey) ?>"><strong><?= htmlspecialchars($parentColis ? $parentColis->package_number : $colis->package_number) ?></strong></td>
+                                <td data-order="<?= htmlspecialchars($groupKey) ?>"><?php if ($parentColis && $colis !== $parentColis): ?><?= htmlspecialchars($colis->package_number) ?><?php elseif ($parentColis && $parentColis->children): ?><span class="badge bg-secondary">Groupage · <?= count($parentColis->children) ?> colis</span><?php endif; ?></td>
                                 <td><?= htmlspecialchars($colis->of_number ?? '') ?></td>
                                 <td><?= htmlspecialchars($colis->order_number ?? '') ?></td>
                                 <td><?= htmlspecialchars($colis->article_reference ?? '') ?></td>
                                 <td><?= htmlspecialchars($colis->label ?? '') ?></td>
 				<td><?= isset($colis->quantity) ? (float)$colis->quantity : '' ?></td>
-                                <?php $scanDt = new DateTime($colis->scan_date_time); ?>
-                                <td data-order="<?= $scanDt->format('Y-m-d H:i:s') ?>"><?= htmlspecialchars($scanDt->format('d/m/Y H:i')) ?></td>
+                                <td><?= htmlspecialchars((new DateTime($colis->scan_date_time))->format('d/m/Y H:i')) ?></td>
                                 <td>
                                     <?= htmlspecialchars($colis->comment ?? '') ?>
                                     <button type="button" class="btn btn-xs btn-outline-secondary ms-1 py-0 px-1" data-bs-toggle="modal" data-bs-target="#commentModal_<?= $colis->id ?>">
@@ -520,15 +518,24 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Utiliser scrollX pour éviter le scroll horizontal sur la page entière
         const hasCheckboxesFlag = hasCheckboxes ? [0, 9] : [8];
-        
-        window.initializeDataTable('#colisTableOnPaletteDetail', [[1, "asc"]], 
+
+        // Bouton PDF : généré côté serveur (Dompdf, A4 paysage, chaque groupage suivi de ses fils).
+        const pdfButton = {
+            text: '<i class="fas fa-file-pdf"></i> PDF',
+            className: 'btn-sm btn-outline-danger',
+            action: () => { window.location.href = <?= json_encode($baseUrl . '/palettes/show/' . $palette->id . '/export/pdf') ?>; }
+        };
+        const buttons = window.dataTableConfigs.commonButtons.map(b => b.extend === 'pdfHtml5' ? pdfButton : b);
+
+        window.initializeDataTable('#colisTableOnPaletteDetail', [[hasCheckboxes ? 1 : 0, "asc"]],
             [{ "orderable": false, "targets": hasCheckboxesFlag }],
             25, // Pagination à 25 lignes
             { 
                 scrollX: true,
                 responsive: false,
                 ordering: true,
-                paging: true
+                paging: true,
+                buttons: buttons
             }
         );
     }

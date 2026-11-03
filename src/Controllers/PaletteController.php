@@ -11,6 +11,7 @@ use App\Models\PackingList;
 use App\Models\Site; // Pour le filtre par site
 use App\Models\User; // Pour récupérer les noms des utilisateurs
 use App\Models\Colis;
+use App\Services\QrCodeService;
 
 
 class PaletteController extends BaseController
@@ -415,7 +416,85 @@ public function indexAll(Request $request): Response
         }
     }
 
-       /**
+    /**
+     * QR code de la palette avec son code écrit dessous, généré à la volée en SVG (rien n'est stocké). ?download=1 pour télécharger.
+     */
+    public function qrCode(Request $request, int $id): Response
+    {
+        $palette = Palette::findById($id);
+        $currentUser = Auth::user();
+        if (!$palette || ($currentUser && !$palette->isAccessibleBy($currentUser))) {
+            return new Response('QR code introuvable.', 404, ['Content-Type' => 'text/plain; charset=utf-8']);
+        }
+        $headers = ['Content-Type' => 'image/svg+xml', 'Cache-Control' => 'private, max-age=86400'];
+        if ($request->get('download')) {
+            $headers['Content-Disposition'] = 'attachment; filename="qr_palette_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $palette->code) . '.svg"';
+        }
+        // ?label=0 : QR seul (l'impression groupée gère elle-même l'affichage du code).
+        $label = $request->get('label', '1') === '0' ? null : $palette->code;
+        return new Response(QrCodeService::svg($palette->code, 300, $label), 200, $headers);
+    }
+
+    /**
+     * Page d'impression directe du QR code d'une palette (le navigateur ouvre l'impression au chargement).
+     */
+    /**
+     * PDF du détail palette (Dompdf, A4 paysage) : chaque groupage suivi de ses colis fils.
+     */
+    public function exportPdf(Request $request, int $id): void
+    {
+        $this->authorize('palette_read_details');
+        $palette = Palette::findById($id);
+        if (!$palette) {
+            $this->flash(FLASH_ERROR, "Palette non trouvée.");
+            $this->redirect('/packing-lists')->send();
+            exit;
+        }
+        if ($r = $this->denyIfNotAccessible($palette, '/packing-lists')) { $r->send(); exit; }
+
+        $logoPath = ROOT_PATH . '/logo.jpg';
+        $html = $this->renderPartial('palettes/export_pdf.php', [
+            'palette' => $palette,
+            'packingList' => PackingList::findById($palette->packing_list_id),
+            'colisGrouped' => $this->groupColisForDisplay(Colis::findByPaletteId($id)),
+            'nbColis' => $palette->getColisCount(),
+            'appName' => APP_NAME,
+            'currentDate' => (new \DateTime())->format('d/m/Y H:i'),
+            'logoBase64' => is_readable($logoPath) ? base64_encode(file_get_contents($logoPath)) : null,
+        ]);
+
+        $options = new \Dompdf\Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isRemoteEnabled', false);
+        $options->set('defaultFont', 'DejaVu Sans');
+        $dompdf = new \Dompdf\Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'landscape');
+        $dompdf->render();
+        $dompdf->getCanvas()->page_text(780, 570, "{PAGE_NUM} / {PAGE_COUNT}", null, 7, [0.4, 0.4, 0.4]);
+
+        if (ob_get_level()) ob_end_clean();
+        $dompdf->stream('Palette_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $palette->code) . '_' . date('Ymd_His') . '.pdf', ['Attachment' => true]);
+        exit;
+    }
+
+    public function qrCodePrint(Request $request, int $id): Response
+    {
+        $palette = Palette::findById($id);
+        $currentUser = Auth::user();
+        if (!$palette || ($currentUser && !$palette->isAccessibleBy($currentUser))) {
+            $this->flash(FLASH_ERROR, "Palette non trouvée.");
+            return $this->redirect('/palettes');
+        }
+        $html = $this->renderPartial('palettes/print_qrcode_single.php', [
+            'palette' => $palette,
+            'qrDataUri' => QrCodeService::svgDataUri($palette->code, 300, $palette->code),
+            'backUrl' => BASE_URL . '/palettes/show/' . $palette->id,
+        ]);
+        return new Response($html, 200, ['Content-Type' => 'text/html; charset=utf-8']);
+    }
+
+    /**
      * Affiche une page avec les QR codes des palettes sélectionnées pour impression.
      * @param Request $request
      * @return Response
@@ -445,14 +524,14 @@ public function indexAll(Request $request): Response
         $currentUser = Auth::user();
         foreach ($selectedPaletteIds as $paletteId) {
             $palette = Palette::findById((int)$paletteId);
-            if (!$palette || empty($palette->qr_code_path)) { continue; }
+            if (!$palette) { continue; }
             // Cloisonnement par site: ne jamais imprimer le QR d'une palette hors périmètre.
             if ($currentUser && !$palette->isAccessibleBy($currentUser)) { continue; }
             $palettesToPrint[] = $palette;
         }
 
         if (empty($palettesToPrint)) {
-            $this->flash(FLASH_ERROR, "Aucune palette valide trouvée pour l'impression (QR codes manquants ?).");
+            $this->flash(FLASH_ERROR, "Aucune palette valide trouvée pour l'impression.");
              return $this->redirect($packingListId ? '/packing-lists/show/' . $packingListId : '/packing-lists');
         }
         

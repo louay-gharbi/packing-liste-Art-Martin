@@ -72,14 +72,9 @@ $currentUserForPaletteFilter = Auth::user(); // Pour déterminer si on affiche l
                 <?php foreach ($palettesWithDetails as $p): // $p est un tableau associatif ?>
                     <tr>
                         <td class="text-center">
-                            <?php if (!empty($p['qr_code_path'])): ?>
-                                <?php $qrUrl = preg_match('#^https?://#', $p['qr_code_path'])
-                                    ? $p['qr_code_path']
-                                    : rtrim($baseUrl, '/') . $p['qr_code_path']; ?>
-                                <a href="<?= htmlspecialchars($qrUrl) ?>" data-bs-toggle="tooltip" data-bs-placement="right" title="Voir QR Code <?= htmlspecialchars($p['code']) ?>" target="_blank">
-                                    <i class="fas fa-qrcode"></i>
-                                </a>
-                            <?php endif; ?>
+                            <a href="<?= htmlspecialchars($baseUrl) ?>/palettes/qr/<?= (int)$p['id'] ?>/print" data-bs-toggle="tooltip" data-bs-placement="right" title="Imprimer le QR Code <?= htmlspecialchars($p['code']) ?>" target="_blank">
+                                <i class="fas fa-qrcode"></i>
+                            </a>
                         </td>
                         <td>
                             <?php if (Auth::can('palette_read_details')): ?>
@@ -114,14 +109,9 @@ $currentUserForPaletteFilter = Auth::user(); // Pour déterminer si on affiche l
                         </td>
                         <td class="text-center"><?= htmlspecialchars($p['max_colis'] ?? 'N/D') ?></td>
                         <td class="text-center"><?= htmlspecialchars($p['colis_count']) ?></td>
-                        <?php
-                            $openDt = $p['open_date_time'] ? new DateTime($p['open_date_time']) : null;
-                            $closeDt = $p['close_date_time'] ? new DateTime($p['close_date_time']) : null;
-                            $createdDt = new DateTime($p['palette_created_at']);
-                        ?>
-                        <td data-order="<?= $openDt ? $openDt->format('Y-m-d H:i:s') : '' ?>"><?= $openDt ? htmlspecialchars($openDt->format('d/m/y H:i')) : '-' ?></td>
-                        <td data-order="<?= $closeDt ? $closeDt->format('Y-m-d H:i:s') : '' ?>"><?= $closeDt ? htmlspecialchars($closeDt->format('d/m/y H:i')) : '-' ?></td>
-                        <td data-order="<?= $createdDt->format('Y-m-d H:i:s') ?>"><?= htmlspecialchars($createdDt->format('d/m/y H:i')) ?></td>
+                        <td data-order="<?= htmlspecialchars($p['open_date_time'] ?? '') ?>"><?= $p['open_date_time'] ? htmlspecialchars((new DateTime($p['open_date_time']))->format('d/m/y H:i')) : '-' ?></td>
+                        <td data-order="<?= htmlspecialchars($p['close_date_time'] ?? '') ?>"><?= $p['close_date_time'] ? htmlspecialchars((new DateTime($p['close_date_time']))->format('d/m/y H:i')) : '-' ?></td>
+                        <td data-order="<?= htmlspecialchars($p['palette_created_at']) ?>"><?= htmlspecialchars((new DateTime($p['palette_created_at']))->format('d/m/y H:i')) ?></td>
                         <td>
                             <?php if (Auth::can('palette_read_details')): ?>
                                 <a href="<?= htmlspecialchars($baseUrl) ?>/palettes/show/<?= $p['id'] ?>" class="btn btn-xs btn-outline-primary py-0 px-1" title="Voir détails">
